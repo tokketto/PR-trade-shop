@@ -67,8 +67,12 @@ header { background: var(--brown); padding: 0 3rem; display: flex; align-items: 
 .stock-qty { font-size: 0.68rem; color: var(--text-light); }
 .qty-input-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.8rem; }
 .qty-label { font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-light); }
-.qty-input { width: 60px; padding: 0.35rem 0.5rem; border: 1px solid var(--border); background: var(--cream); font-family: 'DM Sans', sans-serif; font-size: 0.85rem; color: var(--brown); text-align: center; outline: none; }
-.qty-input:focus { border-color: var(--gold); }
+.qty-stepper { display: flex; align-items: center; gap: 0.6rem; }
+.qty-stepper-btn { width: 26px; height: 26px; border-radius: 50%; border: none; background: var(--brown); color: var(--gold-light); font-family: 'DM Sans', sans-serif; font-size: 0.95rem; line-height: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s, transform 0.1s; flex-shrink: 0; }
+.qty-stepper-btn:hover:not(:disabled) { background: var(--brown-mid); }
+.qty-stepper-btn:active:not(:disabled) { transform: scale(0.92); }
+.qty-stepper-btn:disabled { background: var(--border); color: var(--text-light); cursor: not-allowed; }
+.qty-value { min-width: 22px; text-align: center; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 500; color: var(--brown); }
 .add-btn { width: 100%; padding: 0.75rem 1rem; background: var(--brown); color: var(--gold-light); font-family: 'DM Sans', sans-serif; font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase; border: none; cursor: pointer; transition: background 0.2s; }
 .add-btn:hover { background: var(--brown-mid); }
 .add-btn:disabled { background: var(--cream-dark); color: var(--text-light); cursor: not-allowed; }

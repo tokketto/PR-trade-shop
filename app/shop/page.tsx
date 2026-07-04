@@ -169,9 +169,13 @@ export default function ShopPage() {
                   </div>
                   <div className="qty-input-row">
                     <span className="qty-label">Qty</span>
-                    <input className="qty-input" type="number" min={0} max={p.qty}
-                      value={qty} onChange={e => setQty(p.sku, parseInt(e.target.value) || 0)}
-                      disabled={isOut} />
+                    <div className="qty-stepper">
+                      <button type="button" className="qty-stepper-btn" aria-label="Decrease quantity"
+                        onClick={() => setQty(p.sku, Math.max(0, qty - 1))} disabled={isOut || qty <= 0}>−</button>
+                      <span className="qty-value">{qty}</span>
+                      <button type="button" className="qty-stepper-btn" aria-label="Increase quantity"
+                        onClick={() => setQty(p.sku, Math.min(p.qty, qty + 1))} disabled={isOut || qty >= p.qty}>+</button>
+                    </div>
                   </div>
                   <button className="add-btn" onClick={() => addToCart(p)} disabled={isOut}>
                     {isOut ? 'Unavailable' : 'Add to Order'}
