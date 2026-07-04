@@ -17,7 +17,6 @@ export default function ShopPage() {
     const session = sessionStorage.getItem('pr_partner')
     if (!session) { router.push('/'); return }
     const p = JSON.parse(session)
-    if (p.isAdmin) { router.push('/admin'); return }
     setPartnerName(p.name)
   }, [router])
 
