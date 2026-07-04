@@ -1,4 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { products } from '@/lib/products'
+
+const KV_URL = process.env.KV_REST_API_URL
+const KV_TOKEN = process.env.KV_REST_API_TOKEN
+
+async function kvGet(key: string): Promise<number | null> {
+  const res = await fetch(`${KV_URL}/get/${key}`, {
+    headers: { Authorization: `Bearer ${KV_TOKEN}` },
+    cache: 'no-store',
+  })
+  const data = await res.json()
+  return data.result !== null ? parseInt(data.result) : null
+}
+
+async function kvSet(key: string, value: number) {
+  await fetch(`${KV_URL}/set/${key}/${value}`, {
+    method: 'GET',
+    headers: { Authorization: `Bearer ${KV_TOKEN}` },
+  })
+}
 
 export async function POST(req: NextRequest) {
   const { partnerName, items } = await req.json()
@@ -7,12 +27,27 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid order' }, { status: 400 })
   }
 
+  // Decrease inventory in KV
+  for (const item of items) {
+    const product = products.find(p => p.code === item.code)
+    if (!product) continue
+
+    const key = `inv:${product.sku}`
+    let currentQty = await kvGet(key)
+
+    // If not in KV yet, use default from products.ts
+    if (currentQty === null) currentQty = product.qty
+
+    const newQty = Math.max(0, currentQty - item.qty)
+    await kvSet(key, newQty)
+  }
+
+  // Send email via Resend
   const apiKey = process.env.RESEND_API_KEY
   if (!apiKey) {
     return NextResponse.json({ error: 'Email service not configured' }, { status: 500 })
   }
 
-  // Build order table rows
   const itemRows = items.map((item: { name: string; code: string; qty: number }) => `
     <tr>
       <td style="padding: 8px 12px; border-bottom: 1px solid #EDE5D0;">${item.name}</td>
@@ -49,7 +84,7 @@ export async function POST(req: NextRequest) {
       </div>
       <div style="background: #3D2B1F; padding: 1rem; text-align: center;">
         <p style="color: #EDE5D0; font-size: 0.7rem; opacity: 0.6; margin: 0;">
-          Parmigiano Reggiano Trade Shop — shop.pontecollab.com
+          Parmigiano Reggiano Trade Shop
         </p>
       </div>
     </div>
