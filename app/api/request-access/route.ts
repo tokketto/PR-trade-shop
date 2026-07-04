@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'orders@pontepr.com',
+        from: 'New Access Request <orders@pontepr.com>',
         to: 'federico@pontepr.com',
         reply_to: email.trim(),
         subject: `New Access Request — ${company}`,
