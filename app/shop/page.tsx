@@ -90,7 +90,7 @@ export default function ShopPage() {
             return (
               <div className="product-card" key={p.sku}>
                 <div className="product-img-wrap">
-                  <Image src={`/images/${p.img}`} alt={p.name} fill style={{objectFit:'cover'}} sizes="(max-width:600px) 100vw, 33vw" />
+                  <Image src={p.img} alt={p.name} fill style={{objectFit:'cover'}} sizes="(max-width:600px) 100vw, 33vw" />
                 </div>
                 <div className="card-body">
                   <div className="product-category-tag">{categoryLabels[p.category]}</div>
