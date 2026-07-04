@@ -52,9 +52,13 @@ header { background: var(--brown); padding: 0 3rem; display: flex; align-items: 
 /* CARD */
 .product-card { background: var(--white); display: flex; flex-direction: column; transition: background 0.2s; overflow: hidden; }
 .product-card:hover { background: var(--cream); }
-.product-img-wrap { width: 100%; aspect-ratio: 4/3; overflow: hidden; background: #f0ede6; position: relative; }
+.product-img-wrap { width: 100%; aspect-ratio: 4/3; overflow: hidden; background: #f0ede6; position: relative; cursor: zoom-in; }
 .product-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; display: block; }
 .product-card:hover .product-img-wrap img { transform: scale(1.03); }
+
+.lightbox-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 2rem; cursor: zoom-out; animation: lightbox-fade-in 0.15s ease; }
+.lightbox-img { max-width: 90vw; max-height: 90vh; width: auto; height: auto; object-fit: contain; cursor: default; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+@keyframes lightbox-fade-in { from { opacity: 0; } to { opacity: 1; } }
 .card-body { padding: 1.4rem 1.6rem 1.6rem; display: flex; flex-direction: column; flex: 1; }
 .product-category-tag { font-size: 0.62rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.5rem; }
 .product-name { font-family: 'Libre Bodoni', serif; font-size: 1.2rem; font-weight: 400; color: var(--brown); line-height: 1.3; margin-bottom: 0.3rem; flex: 1; }

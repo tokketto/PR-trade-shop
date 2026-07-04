@@ -16,6 +16,7 @@ export default function ShopPage() {
   const [orderSending, setOrderSending] = useState(false)
   const [inventory, setInventory] = useState<Record<string, number>>({})
   const [invLoaded, setInvLoaded] = useState(false)
+  const [lightbox, setLightbox] = useState<{ src: string; alt: string } | null>(null)
 
   useEffect(() => {
     const session = sessionStorage.getItem('pr_partner')
@@ -32,6 +33,13 @@ export default function ShopPage() {
       })
       .catch(() => setInvLoaded(true))
   }, [router])
+
+  useEffect(() => {
+    if (!lightbox) return
+    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') setLightbox(null) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [lightbox])
 
   // Merge KV inventory with product defaults
   const productsWithQty = products.map(p => ({
@@ -153,7 +161,7 @@ export default function ShopPage() {
             const qty = qtys[p.sku] ?? 1
             return (
               <div className="product-card" key={p.sku}>
-                <div className="product-img-wrap">
+                <div className="product-img-wrap" onClick={() => setLightbox({ src: p.img, alt: p.name })}>
                   <Image src={p.img} alt={p.name} fill style={{objectFit:'cover'}} sizes="(max-width:600px) 100vw, 33vw" />
                 </div>
                 <div className="card-body">
@@ -208,6 +216,12 @@ export default function ShopPage() {
       )}
 
       <footer>&copy; 2026 Consorzio del Formaggio Parmigiano Reggiano — Authorised Trade Partners Only</footer>
+
+      {lightbox && (
+        <div className="lightbox-overlay" onClick={() => setLightbox(null)}>
+          <img src={lightbox.src} alt={lightbox.alt} className="lightbox-img" onClick={e => e.stopPropagation()} />
+        </div>
+      )}
     </>
   )
 }
