@@ -68,6 +68,10 @@ export default function ShopPage() {
 
   const cartItems = Object.entries(cart).filter(([, v]) => v.qty > 0)
   const cartCount = cartItems.length
+  const cartTotal = cartItems.reduce((sum, [sku, v]) => {
+    const p = productsWithQty.find(x => x.sku === sku)
+    return sum + (p ? p.price * v.qty : 0)
+  }, 0)
 
   async function submitOrder() {
     setOrderSending(true)
@@ -168,7 +172,7 @@ export default function ShopPage() {
                   <div className="product-category-tag">{categoryLabels[p.category]}</div>
                   <div className="product-name">{p.name}</div>
                   <div className="product-code">{p.code} · {p.sku}</div>
-                  {p.price && <div className="product-price">{p.price}</div>}
+                  <div className="product-price">${p.price.toFixed(2)}{p.priceNote && <span className="price-note"> ({p.priceNote})</span>}</div>
                   <div className="stock-row">
                     <span className={`stock-badge ${isLow ? 'low-stock' : 'in-stock'}`}>
                       {isOut ? 'Out of Stock' : isLow ? 'Low Stock' : 'In Stock'}
@@ -204,6 +208,10 @@ export default function ShopPage() {
                 const p = productsWithQty.find(x => x.sku === sku)
                 return p ? `${p.code} ×${v.qty}` : ''
               }).join('  ·  ')}
+            </div>
+            <div className="cart-total">
+              Estimated Total <strong>${cartTotal.toFixed(2)}</strong>
+              <span className="cart-total-note"> — estimate only; final total will reflect shipping and packing costs, confirmed before invoicing</span>
             </div>
           </div>
           <div style={{display:'flex',alignItems:'center'}}>
