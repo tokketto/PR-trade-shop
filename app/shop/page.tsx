@@ -172,7 +172,7 @@ export default function ShopPage() {
                   <div className="product-category-tag">{categoryLabels[p.category]}</div>
                   <div className="product-name">{p.name}</div>
                   <div className="product-code">{p.code} · {p.sku}</div>
-                  <div className="product-price">${p.price.toFixed(2)}{p.priceNote && <span className="price-note"> ({p.priceNote})</span>}</div>
+                  <div className="product-price">{p.price === 0 ? 'FREE' : `$${p.price.toFixed(2)}`}{p.priceNote && <span className="price-note"> ({p.priceNote})</span>}</div>
                   <div className="stock-row">
                     <span className={`stock-badge ${isLow ? 'low-stock' : 'in-stock'}`}>
                       {isOut ? 'Out of Stock' : isLow ? 'Low Stock' : 'In Stock'}

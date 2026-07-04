@@ -24,7 +24,7 @@ export const products: Product[] = [
   { name: 'Knife — Double Hook Professional', code: 'PR2601', sku: 'Adv_PR2601', qty: 85, category: 'knives', img: 'https://res.cloudinary.com/w1ti71ox/image/upload/v1783186376/ProfesisonalKnife-doublehook_fperhu.jpg', price: 36 },
   { name: 'Knife — Double Serrated Professional', code: 'PR2603', sku: 'Adv_PR2603', qty: 74, category: 'knives', img: 'https://res.cloudinary.com/w1ti71ox/image/upload/v1783186405/ProfessionKnife-stilleto_anab48.jpg', price: 38 },
   // DISPLAY
-  { name: 'Display 9" × 13 7/16"', code: 'PR2507', sku: 'Adv_PR2507', qty: 2456, category: 'display', img: 'https://res.cloudinary.com/w1ti71ox/image/upload/v1783186284/Display_xinvyt.jpg', price: 45 },
+  { name: 'Display 9" × 13 7/16"', code: 'PR2507', sku: 'Adv_PR2507', qty: 2456, category: 'display', img: 'https://res.cloudinary.com/w1ti71ox/image/upload/v1783186284/Display_xinvyt.jpg', price: 0 },
   { name: 'Plastic Cheese Wheel', code: 'PR2508', sku: 'Adv_PR2508', qty: 30, category: 'display', img: 'https://res.cloudinary.com/w1ti71ox/image/upload/v1783186278/Plastic-Wheel_wlsw2k.jpg', price: 60 },
   { name: 'Plastic Cheese Wheel with Bowl', code: 'PR2508b', sku: 'Adv_PR2508b', qty: 28, category: 'display', img: 'https://res.cloudinary.com/w1ti71ox/image/upload/v1783186297/Plastic-wheel-with-bowl_dezq3j.jpg', price: 75 },
   { name: 'Cheese Wheel Holders', code: 'PR2502', sku: 'Adv_PR2502', qty: 5, category: 'display', img: 'https://res.cloudinary.com/w1ti71ox/image/upload/v1783186399/Wheel-stand_ka8qys.jpg', price: 120 },
