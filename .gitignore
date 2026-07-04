@@ -1,2 +1,11 @@
-public/images/
-public/images/
+# env — NEVER commit this
+.env.local
+.env*.local
+
+# Next.js
+.next/
+out/
+node_modules/
+.vercel
+*.tsbuildinfo
+next-env.d.ts
