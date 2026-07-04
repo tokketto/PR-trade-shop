@@ -1,10 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { addAccessRequest, getAccessRequests } from '@/lib/access-requests'
+import { isAdminRequest } from '@/lib/session'
+
+export async function GET(req: NextRequest) {
+  if (!isAdminRequest(req)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+  const requests = await getAccessRequests()
+  return NextResponse.json(requests)
+}
 
 export async function POST(req: NextRequest) {
   const { company, firstName, lastName, email } = await req.json()
 
   if (!company?.trim() || !firstName?.trim() || !lastName?.trim() || !email?.trim()) {
     return NextResponse.json({ error: 'Please fill in all fields.' }, { status: 400 })
+  }
+
+  try {
+    await addAccessRequest({ company: company.trim(), firstName: firstName.trim(), lastName: lastName.trim(), email: email.trim() })
+  } catch (err) {
+    console.error('Failed to persist access request:', err)
   }
 
   const apiKey = process.env.RESEND_API_KEY

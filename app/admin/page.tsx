@@ -2,10 +2,12 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Partner } from '@/lib/partners'
+import type { AccessRequest } from '@/lib/access-requests'
 
 export default function AdminPage() {
   const router = useRouter()
   const [partners, setPartners] = useState<Partner[]>([])
+  const [requests, setRequests] = useState<AccessRequest[]>([])
   const [loaded, setLoaded] = useState(false)
   const [newName, setNewName] = useState('')
   const [newCode, setNewCode] = useState('')
@@ -18,9 +20,15 @@ export default function AdminPage() {
     const p = JSON.parse(session)
     if (!p.isAdmin) { router.push('/shop'); return }
 
-    fetch('/api/partners')
-      .then(r => r.json())
-      .then(data => { setPartners(data); setLoaded(true) })
+    Promise.all([
+      fetch('/api/partners').then(r => r.json()),
+      fetch('/api/request-access').then(r => r.json()),
+    ])
+      .then(([partnersData, requestsData]) => {
+        setPartners(partnersData)
+        setRequests(Array.isArray(requestsData) ? requestsData : [])
+        setLoaded(true)
+      })
       .catch(() => setLoaded(true))
   }, [router])
 
@@ -62,7 +70,11 @@ export default function AdminPage() {
     setSaving(false)
   }
 
-  function logout() { sessionStorage.removeItem('pr_partner'); router.push('/') }
+  function logout() {
+    fetch('/api/auth', { method: 'DELETE' })
+    sessionStorage.removeItem('pr_partner')
+    router.push('/')
+  }
 
   if (!loaded) return (
     <div style={{minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:'var(--brown)'}}>
@@ -123,6 +135,36 @@ export default function AdminPage() {
         <div className="admin-note">
           New partners can log in with their code as soon as you add them here — there&apos;s nothing else to configure.
         </div>
+
+        <div className="admin-title" style={{fontSize:'1.4rem', marginTop:'3rem'}}>Access Requests</div>
+        <div className="admin-sub">
+          Submitted from the shop&apos;s &quot;Request Access&quot; form. Approve by adding the person as a partner above.
+        </div>
+
+        {requests.length === 0 ? (
+          <div className="admin-note">No access requests yet.</div>
+        ) : (
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>Company</th>
+                <th>Name</th>
+                <th>Business Email</th>
+                <th>Submitted</th>
+              </tr>
+            </thead>
+            <tbody>
+              {requests.slice().reverse().map((r, i) => (
+                <tr key={i}>
+                  <td>{r.company}</td>
+                  <td>{r.firstName} {r.lastName}</td>
+                  <td>{r.email}</td>
+                  <td>{new Date(r.submittedAt).toLocaleDateString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
 
       <footer>&copy; 2026 Consorzio del Formaggio Parmigiano Reggiano — Authorised Trade Partners Only</footer>

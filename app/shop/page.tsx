@@ -48,6 +48,7 @@ export default function ShopPage() {
   }))
 
   function logout() {
+    fetch('/api/auth', { method: 'DELETE' })
     sessionStorage.removeItem('pr_partner')
     router.push('/')
   }

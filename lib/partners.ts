@@ -1,3 +1,5 @@
+import { kvGetString, kvSetString } from './kv'
+
 export type Partner = {
   name: string
   code: string
@@ -5,25 +7,7 @@ export type Partner = {
   isAdmin?: boolean
 }
 
-const KV_URL = process.env.KV_REST_API_URL
-const KV_TOKEN = process.env.KV_REST_API_TOKEN
 const PARTNERS_KEY = 'partners'
-
-async function kvGetString(key: string): Promise<string | null> {
-  const res = await fetch(`${KV_URL}/get/${key}`, {
-    headers: { Authorization: `Bearer ${KV_TOKEN}` },
-    cache: 'no-store',
-  })
-  const data = await res.json()
-  return data.result ?? null
-}
-
-async function kvSetString(key: string, value: string) {
-  await fetch(`${KV_URL}/set/${key}/${encodeURIComponent(value)}`, {
-    method: 'GET',
-    headers: { Authorization: `Bearer ${KV_TOKEN}` },
-  })
-}
 
 function seedFromEnv(): Partner[] {
   const raw = process.env.PARTNER_CODES || ''

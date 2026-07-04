@@ -1,12 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPartners, savePartners } from '@/lib/partners'
+import { isAdminRequest } from '@/lib/session'
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  if (!isAdminRequest(req)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
   const partners = await getPartners()
   return NextResponse.json(partners)
 }
 
 export async function POST(req: NextRequest) {
+  if (!isAdminRequest(req)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const { name, code } = await req.json()
 
   if (!name?.trim() || !code?.trim()) {
@@ -29,6 +37,10 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
+  if (!isAdminRequest(req)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const { code, active } = await req.json()
 
   if (!code || typeof active !== 'boolean') {
