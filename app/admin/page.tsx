@@ -1,50 +1,74 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-
-type Partner = { name: string; code: string; active: boolean; isAdmin?: boolean }
+import type { Partner } from '@/lib/partners'
 
 export default function AdminPage() {
   const router = useRouter()
   const [partners, setPartners] = useState<Partner[]>([])
+  const [loaded, setLoaded] = useState(false)
   const [newName, setNewName] = useState('')
   const [newCode, setNewCode] = useState('')
+  const [error, setError] = useState('')
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     const session = sessionStorage.getItem('pr_partner')
     if (!session) { router.push('/'); return }
     const p = JSON.parse(session)
     if (!p.isAdmin) { router.push('/shop'); return }
-    // Load partners from localStorage (admin-only UI state)
-    const stored = localStorage.getItem('pr_admin_partners')
-    if (stored) { setPartners(JSON.parse(stored)) }
-    else {
-      const defaults: Partner[] = [
-        { name: 'Milano Foods', code: 'MIL-****', active: true },
-        { name: 'Roma Distributors', code: 'ROM-****', active: true },
-        { name: 'Bella Italia NYC', code: 'BIT-****', active: true },
-        { name: 'Admin', code: 'ADMIN-****', active: true, isAdmin: true },
-      ]
-      setPartners(defaults)
-      localStorage.setItem('pr_admin_partners', JSON.stringify(defaults))
-    }
+
+    fetch('/api/partners')
+      .then(r => r.json())
+      .then(data => { setPartners(data); setLoaded(true) })
+      .catch(() => setLoaded(true))
   }, [router])
 
-  function save(updated: Partner[]) {
+  async function revoke(code: string) {
+    const updated = await fetch('/api/partners', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, active: false }),
+    }).then(r => r.json())
     setPartners(updated)
-    localStorage.setItem('pr_admin_partners', JSON.stringify(updated))
   }
 
-  function revoke(i: number) { const p = [...partners]; p[i].active = false; save(p) }
-  function restore(i: number) { const p = [...partners]; p[i].active = true; save(p) }
+  async function restore(code: string) {
+    const updated = await fetch('/api/partners', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, active: true }),
+    }).then(r => r.json())
+    setPartners(updated)
+  }
 
-  function addPartner() {
-    if (!newName.trim() || !newCode.trim()) { alert('Please enter both a name and a code.'); return }
-    save([...partners, { name: newName.trim(), code: newCode.trim(), active: true }])
-    setNewName(''); setNewCode('')
+  async function addPartner() {
+    if (!newName.trim() || !newCode.trim()) { setError('Please enter both a name and a code.'); return }
+    setSaving(true)
+    setError('')
+    try {
+      const res = await fetch('/api/partners', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newName.trim(), code: newCode.trim() }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setError(data.error || 'Something went wrong.'); setSaving(false); return }
+      setPartners(data)
+      setNewName(''); setNewCode('')
+    } catch {
+      setError('Something went wrong. Please try again.')
+    }
+    setSaving(false)
   }
 
   function logout() { sessionStorage.removeItem('pr_partner'); router.push('/') }
+
+  if (!loaded) return (
+    <div style={{minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:'var(--brown)'}}>
+      <p style={{color:'var(--gold-light)', fontFamily:'Libre Bodoni, serif', fontSize:'1.2rem', letterSpacing:'0.1em'}}>Loading…</p>
+    </div>
+  )
 
   return (
     <>
@@ -60,29 +84,29 @@ export default function AdminPage() {
         <button className="admin-back" onClick={() => router.push('/shop')}>← View Shop</button>
         <div className="admin-title">Partner Access Manager</div>
         <div className="admin-sub">
-          Codes are stored in your Vercel environment variable <code>PARTNER_CODES</code> — never visible in source.
-          This panel tracks partner status locally. To add or change a code, update the env variable in Vercel and redeploy.
+          Codes are stored in your database and take effect immediately — no redeploy needed. Revoking a
+          partner disables their code right away.
         </div>
 
         <table className="admin-table">
           <thead>
             <tr>
               <th>Partner Name</th>
-              <th>Code (masked)</th>
+              <th>Access Code</th>
               <th>Status</th>
               <th>Action</th>
             </tr>
           </thead>
           <tbody>
-            {partners.map((p, i) => (
-              <tr key={i}>
+            {partners.map((p) => (
+              <tr key={p.code}>
                 <td>{p.name}{p.isAdmin && <span style={{fontSize:'0.65rem',color:'var(--gold)',marginLeft:6}}>ADMIN</span>}</td>
                 <td><span className="code-pill">{p.code}</span></td>
                 <td><span className={p.active ? 'status-active' : 'status-revoked'}>{p.active ? 'Active' : 'Revoked'}</span></td>
                 <td>
                   {p.isAdmin ? '—' : p.active
-                    ? <button className="action-btn revoke" onClick={() => revoke(i)}>Revoke</button>
-                    : <button className="action-btn restore" onClick={() => restore(i)}>Restore</button>}
+                    ? <button className="action-btn revoke" onClick={() => revoke(p.code)}>Revoke</button>
+                    : <button className="action-btn restore" onClick={() => restore(p.code)}>Restore</button>}
                 </td>
               </tr>
             ))}
@@ -91,12 +115,13 @@ export default function AdminPage() {
 
         <div className="add-partner-row">
           <input className="admin-input" placeholder="Partner name" value={newName} onChange={e => setNewName(e.target.value)} />
-          <input className="admin-input" placeholder="Masked label (e.g. NYC-****)" value={newCode} onChange={e => setNewCode(e.target.value)} />
-          <button className="admin-add-btn" onClick={addPartner}>Add Row</button>
+          <input className="admin-input" placeholder="Access code (e.g. NYC-4471)" value={newCode} onChange={e => setNewCode(e.target.value)} />
+          <button className="admin-add-btn" onClick={addPartner} disabled={saving}>{saving ? 'Adding…' : 'Add Partner'}</button>
         </div>
+        {error && <div className="login-error">{error}</div>}
 
         <div className="admin-note">
-          <strong>To add a real partner:</strong> Add their name and code to the <code>PARTNER_CODES</code> env variable in your Vercel dashboard, then redeploy. The code column here shows masked labels only — actual codes never appear in the browser.
+          New partners can log in with their code as soon as you add them here — there&apos;s nothing else to configure.
         </div>
       </div>
 
