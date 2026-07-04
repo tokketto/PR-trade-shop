@@ -14,26 +14,43 @@ export default function ShopPage() {
   const [qtys, setQtys] = useState<Record<string, number>>({})
   const [orderSent, setOrderSent] = useState(false)
   const [orderSending, setOrderSending] = useState(false)
+  const [inventory, setInventory] = useState<Record<string, number>>({})
+  const [invLoaded, setInvLoaded] = useState(false)
 
   useEffect(() => {
     const session = sessionStorage.getItem('pr_partner')
     if (!session) { router.push('/'); return }
     const p = JSON.parse(session)
     setPartnerName(p.name)
+
+    // Load live inventory from KV
+    fetch('/api/inventory')
+      .then(r => r.json())
+      .then(data => {
+        setInventory(data)
+        setInvLoaded(true)
+      })
+      .catch(() => setInvLoaded(true))
   }, [router])
+
+  // Merge KV inventory with product defaults
+  const productsWithQty = products.map(p => ({
+    ...p,
+    qty: inventory[p.sku] !== undefined ? inventory[p.sku] : p.qty,
+  }))
 
   function logout() {
     sessionStorage.removeItem('pr_partner')
     router.push('/')
   }
 
-  const filtered = filter === 'all' ? products : products.filter(p => p.category === filter)
+  const filtered = filter === 'all' ? productsWithQty : productsWithQty.filter(p => p.category === filter)
 
   function setQty(sku: string, val: number) {
     setQtys(prev => ({ ...prev, [sku]: val }))
   }
 
-  function addToCart(p: Product) {
+  function addToCart(p: Product & { qty: number }) {
     const qty = qtys[p.sku] ?? 1
     if (qty <= 0 || qty > p.qty) return
     setCart(prev => ({ ...prev, [p.sku]: { qty } }))
@@ -47,7 +64,7 @@ export default function ShopPage() {
   async function submitOrder() {
     setOrderSending(true)
     const items = cartItems.map(([sku, v]) => {
-      const p = products.find(x => x.sku === sku)
+      const p = productsWithQty.find(x => x.sku === sku)
       return p ? { name: p.name, code: p.code, qty: v.qty } : null
     }).filter(Boolean)
 
@@ -58,6 +75,9 @@ export default function ShopPage() {
         body: JSON.stringify({ partnerName, items }),
       })
       setCart({})
+      // Refresh inventory after order
+      const updated = await fetch('/api/inventory').then(r => r.json())
+      setInventory(updated)
       setOrderSent(true)
     } catch {
       alert('Something went wrong. Please try again.')
@@ -65,7 +85,11 @@ export default function ShopPage() {
     setOrderSending(false)
   }
 
-  if (!partnerName) return null
+  if (!partnerName || !invLoaded) return (
+    <div style={{minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:'var(--brown)'}}>
+      <p style={{color:'var(--gold-light)', fontFamily:'Cormorant Garamond, serif', fontSize:'1.2rem', letterSpacing:'0.1em'}}>Loading…</p>
+    </div>
+  )
 
   if (orderSent) return (
     <>
@@ -165,7 +189,7 @@ export default function ShopPage() {
             <strong>{cartCount}</strong> items selected
             <div className="cart-items-list">
               {cartItems.map(([sku, v]) => {
-                const p = products.find(x => x.sku === sku)
+                const p = productsWithQty.find(x => x.sku === sku)
                 return p ? `${p.code} ×${v.qty}` : ''
               }).join('  ·  ')}
             </div>
