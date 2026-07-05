@@ -80,3 +80,33 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: 'Could not save — database unavailable' }, { status: 500 })
   }
 }
+
+export async function DELETE(req: NextRequest) {
+  if (!isAdminRequest(req)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const { code } = await req.json()
+
+  if (!code) {
+    return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
+  }
+
+  try {
+    const partners = await getPartners()
+    const target = partners.find(p => p.code === code)
+    if (!target) {
+      return NextResponse.json({ error: 'Partner not found' }, { status: 404 })
+    }
+    if (target.isAdmin) {
+      return NextResponse.json({ error: 'Cannot delete the Admin account' }, { status: 400 })
+    }
+
+    const updated = partners.filter(p => p.code !== code)
+    await savePartners(updated)
+    return NextResponse.json(updated)
+  } catch (err) {
+    console.error('Delete partner error:', err)
+    return NextResponse.json({ error: 'Could not save — database unavailable' }, { status: 500 })
+  }
+}

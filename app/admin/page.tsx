@@ -69,6 +69,27 @@ export default function AdminPage() {
     await updatePartner({ code, active: true })
   }
 
+  async function deletePartner(code: string, name: string) {
+    const ok = window.confirm(
+      `Delete ${name}? This permanently removes their access code, contact info, and shipping address. ` +
+      `Past orders stay on file but won't be linked to this partner anymore. This can't be undone.`
+    )
+    if (!ok) return
+    try {
+      const res = await fetch('/api/partners', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setError(data.error || 'Something went wrong.'); return }
+      setPartners(data)
+      setError('')
+    } catch {
+      setError('Something went wrong. Please try again.')
+    }
+  }
+
   function clearDrafts(code: string) {
     setNameDrafts(prev => { const c = { ...prev }; delete c[code]; return c })
     setCodeDrafts(prev => { const c = { ...prev }; delete c[code]; return c })
@@ -227,6 +248,7 @@ export default function AdminPage() {
                     {!p.isAdmin && (p.active
                       ? <button className="action-btn revoke" onClick={() => revoke(p.code)}>Revoke</button>
                       : <button className="action-btn restore" onClick={() => restore(p.code)}>Restore</button>)}
+                    {!p.isAdmin && <button className="action-btn revoke" onClick={() => deletePartner(p.code, p.name)}>Delete</button>}
                   </div>
                 </td>
               </tr>
