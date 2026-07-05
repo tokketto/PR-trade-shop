@@ -144,6 +144,8 @@ export default function AdminPage() {
     router.push('/')
   }
 
+  const pendingRequests = requests.filter(r => r.status !== 'approved')
+
   if (!loaded) return (
     <div style={{minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:'var(--brown)'}}>
       <p style={{color:'var(--gold-light)', fontFamily:'Libre Bodoni, serif', fontSize:'1.2rem', letterSpacing:'0.1em'}}>Loading…</p>
@@ -246,11 +248,11 @@ export default function AdminPage() {
         <div className="admin-title" style={{fontSize:'1.4rem', marginTop:'3rem'}}>Access Requests</div>
         <div className="admin-sub">
           Submitted from the shop&apos;s &quot;Request Access&quot; form. Enter a code and approve to turn a request
-          straight into an active partner (using the company name).
+          straight into an active partner (using the company name). Approved requests move off this list once handled.
         </div>
 
-        {requests.length === 0 ? (
-          <div className="admin-note">No access requests yet.</div>
+        {pendingRequests.length === 0 ? (
+          <div className="admin-note">No pending requests.</div>
         ) : (
           <table className="admin-table">
             <thead>
@@ -259,32 +261,26 @@ export default function AdminPage() {
                 <th>Name</th>
                 <th>Business Email</th>
                 <th>Submitted</th>
-                <th>Status</th>
                 <th>Approve</th>
               </tr>
             </thead>
             <tbody>
-              {requests.slice().reverse().map((r) => (
+              {pendingRequests.slice().reverse().map((r) => (
                 <tr key={r.id}>
                   <td>{r.company}</td>
                   <td>{r.firstName} {r.lastName}</td>
                   <td>{r.email}</td>
                   <td>{new Date(r.submittedAt).toLocaleDateString()}</td>
-                  <td><span className={r.status === 'approved' ? 'status-active' : 'status-pending'}>{r.status === 'approved' ? 'Approved' : 'Pending'}</span></td>
                   <td>
-                    {r.status === 'approved' ? '—' : (
-                      <>
-                        <div style={{display:'flex', gap:'0.4rem', alignItems:'center'}}>
-                          <input className="admin-input" style={{minWidth:120}} placeholder="Code"
-                            value={approveCodes[r.id] ?? ''}
-                            onChange={e => setApproveCodes(prev => ({ ...prev, [r.id]: e.target.value }))} />
-                          <button className="action-btn restore" onClick={() => approveRequest(r.id)} disabled={approving[r.id]}>
-                            {approving[r.id] ? '…' : 'Approve'}
-                          </button>
-                        </div>
-                        {requestErrors[r.id] && <div style={{color:'#C0392B', fontSize:'0.65rem', marginTop:4}}>{requestErrors[r.id]}</div>}
-                      </>
-                    )}
+                    <div style={{display:'flex', gap:'0.4rem', alignItems:'center'}}>
+                      <input className="admin-input" style={{minWidth:120}} placeholder="Code"
+                        value={approveCodes[r.id] ?? ''}
+                        onChange={e => setApproveCodes(prev => ({ ...prev, [r.id]: e.target.value }))} />
+                      <button className="action-btn restore" onClick={() => approveRequest(r.id)} disabled={approving[r.id]}>
+                        {approving[r.id] ? '…' : 'Approve'}
+                      </button>
+                    </div>
+                    {requestErrors[r.id] && <div style={{color:'#C0392B', fontSize:'0.65rem', marginTop:4}}>{requestErrors[r.id]}</div>}
                   </td>
                 </tr>
               ))}
