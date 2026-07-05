@@ -84,11 +84,16 @@ export default function ShopPage() {
     }).filter(Boolean)
 
     try {
-      await fetch('/api/order', {
+      const res = await fetch('/api/order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ partnerName, items }),
       })
+      if (!res.ok) {
+        alert('Something went wrong submitting your order. Please try again.')
+        setOrderSending(false)
+        return
+      }
       setCart({})
       // Refresh inventory after order
       const updated = await fetch('/api/inventory').then(r => r.json())
