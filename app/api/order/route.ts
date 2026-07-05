@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { products } from '@/lib/products'
 import { getPartners } from '@/lib/partners'
+import { addOrder } from '@/lib/orders'
 
 const KV_URL = process.env.KV_REST_API_URL
 const KV_TOKEN = process.env.KV_REST_API_TOKEN
@@ -26,6 +27,12 @@ export async function POST(req: NextRequest) {
 
   if (!partnerName || !items || items.length === 0) {
     return NextResponse.json({ error: 'Invalid order' }, { status: 400 })
+  }
+
+  try {
+    await addOrder({ partnerName, items })
+  } catch (err) {
+    console.error('Failed to persist order:', err)
   }
 
   // Decrease inventory in KV

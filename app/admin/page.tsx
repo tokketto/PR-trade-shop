@@ -220,9 +220,12 @@ export default function AdminPage() {
                   </button>
                 </td>
                 <td>
-                  {p.isAdmin ? '—' : p.active
-                    ? <button className="action-btn revoke" onClick={() => revoke(p.code)}>Revoke</button>
-                    : <button className="action-btn restore" onClick={() => restore(p.code)}>Restore</button>}
+                  <div style={{display:'flex', gap:'0.4rem', flexWrap:'wrap'}}>
+                    <button className="action-btn" onClick={() => router.push(`/admin/orders/${encodeURIComponent(p.code)}`)}>Orders</button>
+                    {!p.isAdmin && (p.active
+                      ? <button className="action-btn revoke" onClick={() => revoke(p.code)}>Revoke</button>
+                      : <button className="action-btn restore" onClick={() => restore(p.code)}>Restore</button>)}
+                  </div>
                 </td>
               </tr>
             ))}
