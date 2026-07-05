@@ -62,7 +62,7 @@ export default function LoginPage() {
   return (
     <>
       <header>
-        <a className="logo" href="/"><span style={{color:'var(--gold-light)'}}>Parmigiano Reggiano</span> <span>Trade Partners</span></a>
+        <a className="logo" href="/">Parmigiano Reggiano <span>Trade Partners</span></a>
       </header>
       <div className="login-screen">
         <div className="login-box">
