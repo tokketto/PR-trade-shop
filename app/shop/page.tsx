@@ -9,6 +9,7 @@ type CartItem = { qty: number }
 export default function ShopPage() {
   const router = useRouter()
   const [partnerName, setPartnerName] = useState('')
+  const [isAdmin, setIsAdmin] = useState(false)
   const [filter, setFilter] = useState('all')
   const [cart, setCart] = useState<Record<string, CartItem>>({})
   const [qtys, setQtys] = useState<Record<string, number>>({})
@@ -23,6 +24,7 @@ export default function ShopPage() {
     if (!session) { router.push('/'); return }
     const p = JSON.parse(session)
     setPartnerName(p.name)
+    setIsAdmin(!!p.isAdmin)
 
     // Load live inventory from KV
     fetch('/api/inventory')
@@ -110,6 +112,7 @@ export default function ShopPage() {
         <a className="logo" href="/shop">Parmigiano Reggiano <span>Trade Partners</span></a>
         <div className="header-right">
           <span className="partner-name">{partnerName}</span>
+          {isAdmin && <button className="logout-btn" onClick={() => router.push('/admin')}>Admin Dashboard</button>}
           <button className="logout-btn" onClick={logout}>Sign Out</button>
         </div>
       </header>
@@ -136,6 +139,7 @@ export default function ShopPage() {
         <a className="logo" href="/shop">Parmigiano Reggiano <span>Trade Partners</span></a>
         <div className="header-right">
           <span className="partner-name">{partnerName}</span>
+          {isAdmin && <button className="logout-btn" onClick={() => router.push('/admin')}>Admin Dashboard</button>}
           <button className="logout-btn" onClick={logout}>Sign Out</button>
         </div>
       </header>
