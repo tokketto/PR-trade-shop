@@ -41,9 +41,9 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { code, active, shippingAddress } = await req.json()
+  const { code, active, shippingAddress, contactName, contactEmail } = await req.json()
 
-  if (!code || (typeof active !== 'boolean' && shippingAddress === undefined)) {
+  if (!code || (typeof active !== 'boolean' && shippingAddress === undefined && contactName === undefined && contactEmail === undefined)) {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
   }
 
@@ -54,6 +54,8 @@ export async function PATCH(req: NextRequest) {
           ...p,
           ...(typeof active === 'boolean' ? { active } : {}),
           ...(shippingAddress !== undefined ? { shippingAddress } : {}),
+          ...(contactName !== undefined ? { contactName } : {}),
+          ...(contactEmail !== undefined ? { contactEmail } : {}),
         }
       : p)
     await savePartners(updated)

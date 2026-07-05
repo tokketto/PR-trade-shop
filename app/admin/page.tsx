@@ -17,6 +17,9 @@ export default function AdminPage() {
   const [addressDrafts, setAddressDrafts] = useState<Record<string, string>>({})
   const [addressSaving, setAddressSaving] = useState<Record<string, boolean>>({})
 
+  const [contactDrafts, setContactDrafts] = useState<Record<string, { name: string; email: string }>>({})
+  const [contactSaving, setContactSaving] = useState<Record<string, boolean>>({})
+
   const [approveCodes, setApproveCodes] = useState<Record<string, string>>({})
   const [approving, setApproving] = useState<Record<string, boolean>>({})
   const [requestErrors, setRequestErrors] = useState<Record<string, string>>({})
@@ -70,6 +73,16 @@ export default function AdminPage() {
     setAddressSaving(prev => ({ ...prev, [code]: true }))
     await updatePartner({ code, shippingAddress })
     setAddressSaving(prev => ({ ...prev, [code]: false }))
+  }
+
+  async function saveContact(code: string) {
+    const partner = partners.find(p => p.code === code)
+    const draft = contactDrafts[code]
+    const contactName = (draft?.name ?? partner?.contactName ?? '').trim()
+    const contactEmail = (draft?.email ?? partner?.contactEmail ?? '').trim()
+    setContactSaving(prev => ({ ...prev, [code]: true }))
+    await updatePartner({ code, contactName, contactEmail })
+    setContactSaving(prev => ({ ...prev, [code]: false }))
   }
 
   async function addPartner() {
@@ -143,7 +156,8 @@ export default function AdminPage() {
         <div className="admin-title">Partner Access Manager</div>
         <div className="admin-sub">
           Codes are stored in your database and take effect immediately — no redeploy needed. Revoking a
-          partner disables their code right away. Shipping address is entered manually and appears on order emails.
+          partner disables their code right away. Contact info is filled in automatically when approving an
+          access request; shipping address is entered manually. Both appear on order emails.
         </div>
 
         <table className="admin-table">
@@ -152,6 +166,7 @@ export default function AdminPage() {
               <th>Partner Name</th>
               <th>Access Code</th>
               <th>Status</th>
+              <th>Contact</th>
               <th>Shipping Address</th>
               <th>Action</th>
             </tr>
@@ -162,6 +177,19 @@ export default function AdminPage() {
                 <td>{p.name}{p.isAdmin && <span style={{fontSize:'0.65rem',color:'var(--gold)',marginLeft:6}}>ADMIN</span>}</td>
                 <td><span className="code-pill">{p.code}</span></td>
                 <td><span className={p.active ? 'status-active' : 'status-revoked'}>{p.active ? 'Active' : 'Revoked'}</span></td>
+                <td>
+                  <div style={{display:'flex', flexDirection:'column', gap:'0.3rem', minWidth:170}}>
+                    <input className="admin-input" placeholder="Contact name"
+                      value={contactDrafts[p.code]?.name ?? p.contactName ?? ''}
+                      onChange={e => setContactDrafts(prev => ({ ...prev, [p.code]: { name: e.target.value, email: prev[p.code]?.email ?? p.contactEmail ?? '' } }))} />
+                    <input className="admin-input" placeholder="Contact email"
+                      value={contactDrafts[p.code]?.email ?? p.contactEmail ?? ''}
+                      onChange={e => setContactDrafts(prev => ({ ...prev, [p.code]: { name: prev[p.code]?.name ?? p.contactName ?? '', email: e.target.value } }))} />
+                    <button className="action-btn" onClick={() => saveContact(p.code)} disabled={contactSaving[p.code]}>
+                      {contactSaving[p.code] ? '…' : 'Save'}
+                    </button>
+                  </div>
+                </td>
                 <td>
                   <div style={{display:'flex', gap:'0.4rem', alignItems:'center'}}>
                     <input className="admin-input" style={{minWidth:160}} placeholder="Not on file"

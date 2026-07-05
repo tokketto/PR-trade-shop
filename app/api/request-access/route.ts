@@ -34,7 +34,13 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: 'That code is already in use' }, { status: 409 })
     }
 
-    const updatedPartners = [...partners, { name: target.company, code: code.trim(), active: true }]
+    const updatedPartners = [...partners, {
+      name: target.company,
+      code: code.trim(),
+      active: true,
+      contactName: `${target.firstName} ${target.lastName}`.trim(),
+      contactEmail: target.email,
+    }]
     await savePartners(updatedPartners)
 
     const updatedRequests = requests.map(r => r.id === id ? { ...r, status: 'approved' as const } : r)
