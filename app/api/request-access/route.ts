@@ -46,6 +46,58 @@ export async function PATCH(req: NextRequest) {
     const updatedRequests = requests.map(r => r.id === id ? { ...r, status: 'approved' as const } : r)
     await saveAccessRequests(updatedRequests)
 
+    // Email the new partner their access code — best-effort, doesn't fail the approval
+    const apiKey = process.env.RESEND_API_KEY
+    if (apiKey) {
+      const loginUrl = req.nextUrl.origin
+      const welcomeHtml = `
+        <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; color: #2C1F14;">
+          <div style="background: #3D2B1F; padding: 2rem; text-align: center; border-bottom: 2px solid #B8963E;">
+            <h1 style="color: #D4AF5A; font-size: 1.4rem; font-weight: 400; letter-spacing: 0.15em; text-transform: uppercase; margin: 0;">
+              Parmigiano Reggiano
+            </h1>
+            <p style="color: #EDE5D0; font-size: 0.8rem; margin: 0.5rem 0 0; letter-spacing: 0.1em;">Trade Shop Access Approved</p>
+          </div>
+          <div style="padding: 2rem; background: #F7F2E8;">
+            <p style="font-size: 0.9rem; color: #6B4C38; margin-bottom: 1.5rem;">
+              Welcome, ${target.firstName}! Your request for <strong>${target.company}</strong> has been approved.
+            </p>
+            <p style="font-size: 0.85rem; color: #8C6E5A; margin-bottom: 0.5rem;">Your access code</p>
+            <p style="font-size: 1.4rem; letter-spacing: 0.1em; color: #2C1F14; background: #FDFAF4; border: 1px solid #D9C9A8; padding: 0.9rem 1.2rem; text-align: center; margin-bottom: 1.5rem;">
+              ${code.trim()}
+            </p>
+            <p style="font-size: 0.85rem; color: #6B4C38;">
+              Head to <a href="${loginUrl}" style="color: #B8963E;">${loginUrl}</a> and enter this code to start browsing the trade collection.
+            </p>
+          </div>
+          <div style="background: #3D2B1F; padding: 1rem; text-align: center;">
+            <p style="color: #EDE5D0; font-size: 0.7rem; opacity: 0.6; margin: 0;">
+              Parmigiano Reggiano Trade Shop
+            </p>
+          </div>
+        </div>
+      `
+
+      try {
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            from: 'Parmigiano Reggiano Trade Shop <orders@pontepr.com>',
+            to: target.email,
+            reply_to: 'federico@pontepr.com',
+            subject: 'Your Trade Shop Access Code',
+            html: welcomeHtml,
+          }),
+        })
+      } catch (err) {
+        console.error('Approval email error:', err)
+      }
+    }
+
     return NextResponse.json({ partners: updatedPartners, requests: updatedRequests })
   } catch (err) {
     console.error('Approve request error:', err)
