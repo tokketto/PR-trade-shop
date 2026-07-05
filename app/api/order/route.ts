@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { products } from '@/lib/products'
+import { getPartners } from '@/lib/partners'
 
 const KV_URL = process.env.KV_REST_API_URL
 const KV_TOKEN = process.env.KV_REST_API_TOKEN
@@ -48,6 +49,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Email service not configured' }, { status: 500 })
   }
 
+  const partners = await getPartners()
+  const partner = partners.find(p => p.name === partnerName)
+  const shippingAddress = partner?.shippingAddress?.trim()
+
   const itemRows = items.map((item: { name: string; code: string; qty: number }) => `
     <tr>
       <td style="padding: 8px 12px; border-bottom: 1px solid #EDE5D0;">${item.name}</td>
@@ -67,6 +72,9 @@ export async function POST(req: NextRequest) {
       <div style="padding: 2rem; background: #F7F2E8;">
         <p style="font-size: 0.9rem; color: #6B4C38; margin-bottom: 1.5rem;">
           A new order has been submitted by <strong>${partnerName}</strong>.
+        </p>
+        <p style="font-size: 0.85rem; color: #6B4C38; margin-bottom: 1.5rem;">
+          <strong>Shipping address:</strong> ${shippingAddress || 'Not on file — check with the partner before shipping.'}
         </p>
         <table style="width: 100%; border-collapse: collapse; background: #FDFAF4; border: 1px solid #D9C9A8;">
           <thead>

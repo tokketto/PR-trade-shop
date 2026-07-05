@@ -41,15 +41,21 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { code, active } = await req.json()
+  const { code, active, shippingAddress } = await req.json()
 
-  if (!code || typeof active !== 'boolean') {
+  if (!code || (typeof active !== 'boolean' && shippingAddress === undefined)) {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
   }
 
   try {
     const partners = await getPartners()
-    const updated = partners.map(p => p.code === code ? { ...p, active } : p)
+    const updated = partners.map(p => p.code === code
+      ? {
+          ...p,
+          ...(typeof active === 'boolean' ? { active } : {}),
+          ...(shippingAddress !== undefined ? { shippingAddress } : {}),
+        }
+      : p)
     await savePartners(updated)
     return NextResponse.json(updated)
   } catch (err) {

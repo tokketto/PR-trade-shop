@@ -14,6 +14,13 @@ export default function AdminPage() {
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
 
+  const [addressDrafts, setAddressDrafts] = useState<Record<string, string>>({})
+  const [addressSaving, setAddressSaving] = useState<Record<string, boolean>>({})
+
+  const [approveCodes, setApproveCodes] = useState<Record<string, string>>({})
+  const [approving, setApproving] = useState<Record<string, boolean>>({})
+  const [requestErrors, setRequestErrors] = useState<Record<string, string>>({})
+
   useEffect(() => {
     const session = sessionStorage.getItem('pr_partner')
     if (!session) { router.push('/'); return }
@@ -32,22 +39,37 @@ export default function AdminPage() {
       .catch(() => setLoaded(true))
   }, [router])
 
+  async function updatePartner(body: object): Promise<boolean> {
+    try {
+      const res = await fetch('/api/partners', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      const data = await res.json()
+      if (!res.ok) { setError(data.error || 'Something went wrong.'); return false }
+      setPartners(data)
+      setError('')
+      return true
+    } catch {
+      setError('Something went wrong. Please try again.')
+      return false
+    }
+  }
+
   async function revoke(code: string) {
-    const updated = await fetch('/api/partners', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code, active: false }),
-    }).then(r => r.json())
-    setPartners(updated)
+    await updatePartner({ code, active: false })
   }
 
   async function restore(code: string) {
-    const updated = await fetch('/api/partners', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code, active: true }),
-    }).then(r => r.json())
-    setPartners(updated)
+    await updatePartner({ code, active: true })
+  }
+
+  async function saveAddress(code: string) {
+    const shippingAddress = (addressDrafts[code] ?? '').trim()
+    setAddressSaving(prev => ({ ...prev, [code]: true }))
+    await updatePartner({ code, shippingAddress })
+    setAddressSaving(prev => ({ ...prev, [code]: false }))
   }
 
   async function addPartner() {
@@ -68,6 +90,30 @@ export default function AdminPage() {
       setError('Something went wrong. Please try again.')
     }
     setSaving(false)
+  }
+
+  async function approveRequest(id: string) {
+    const code = (approveCodes[id] ?? '').trim()
+    if (!code) { setRequestErrors(prev => ({ ...prev, [id]: 'Enter a code first.' })); return }
+    setApproving(prev => ({ ...prev, [id]: true }))
+    setRequestErrors(prev => ({ ...prev, [id]: '' }))
+    try {
+      const res = await fetch('/api/request-access', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, code }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setRequestErrors(prev => ({ ...prev, [id]: data.error || 'Something went wrong.' }))
+      } else {
+        setPartners(data.partners)
+        setRequests(data.requests)
+      }
+    } catch {
+      setRequestErrors(prev => ({ ...prev, [id]: 'Something went wrong.' }))
+    }
+    setApproving(prev => ({ ...prev, [id]: false }))
   }
 
   function logout() {
@@ -97,7 +143,7 @@ export default function AdminPage() {
         <div className="admin-title">Partner Access Manager</div>
         <div className="admin-sub">
           Codes are stored in your database and take effect immediately — no redeploy needed. Revoking a
-          partner disables their code right away.
+          partner disables their code right away. Shipping address is entered manually and appears on order emails.
         </div>
 
         <table className="admin-table">
@@ -106,6 +152,7 @@ export default function AdminPage() {
               <th>Partner Name</th>
               <th>Access Code</th>
               <th>Status</th>
+              <th>Shipping Address</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -115,6 +162,16 @@ export default function AdminPage() {
                 <td>{p.name}{p.isAdmin && <span style={{fontSize:'0.65rem',color:'var(--gold)',marginLeft:6}}>ADMIN</span>}</td>
                 <td><span className="code-pill">{p.code}</span></td>
                 <td><span className={p.active ? 'status-active' : 'status-revoked'}>{p.active ? 'Active' : 'Revoked'}</span></td>
+                <td>
+                  <div style={{display:'flex', gap:'0.4rem', alignItems:'center'}}>
+                    <input className="admin-input" style={{minWidth:160}} placeholder="Not on file"
+                      value={addressDrafts[p.code] ?? p.shippingAddress ?? ''}
+                      onChange={e => setAddressDrafts(prev => ({ ...prev, [p.code]: e.target.value }))} />
+                    <button className="action-btn" onClick={() => saveAddress(p.code)} disabled={addressSaving[p.code]}>
+                      {addressSaving[p.code] ? '…' : 'Save'}
+                    </button>
+                  </div>
+                </td>
                 <td>
                   {p.isAdmin ? '—' : p.active
                     ? <button className="action-btn revoke" onClick={() => revoke(p.code)}>Revoke</button>
@@ -138,7 +195,8 @@ export default function AdminPage() {
 
         <div className="admin-title" style={{fontSize:'1.4rem', marginTop:'3rem'}}>Access Requests</div>
         <div className="admin-sub">
-          Submitted from the shop&apos;s &quot;Request Access&quot; form. Approve by adding the person as a partner above.
+          Submitted from the shop&apos;s &quot;Request Access&quot; form. Enter a code and approve to turn a request
+          straight into an active partner (using the company name).
         </div>
 
         {requests.length === 0 ? (
@@ -151,15 +209,33 @@ export default function AdminPage() {
                 <th>Name</th>
                 <th>Business Email</th>
                 <th>Submitted</th>
+                <th>Status</th>
+                <th>Approve</th>
               </tr>
             </thead>
             <tbody>
-              {requests.slice().reverse().map((r, i) => (
-                <tr key={i}>
+              {requests.slice().reverse().map((r) => (
+                <tr key={r.id}>
                   <td>{r.company}</td>
                   <td>{r.firstName} {r.lastName}</td>
                   <td>{r.email}</td>
                   <td>{new Date(r.submittedAt).toLocaleDateString()}</td>
+                  <td><span className={r.status === 'approved' ? 'status-active' : 'status-pending'}>{r.status === 'approved' ? 'Approved' : 'Pending'}</span></td>
+                  <td>
+                    {r.status === 'approved' ? '—' : (
+                      <>
+                        <div style={{display:'flex', gap:'0.4rem', alignItems:'center'}}>
+                          <input className="admin-input" style={{minWidth:120}} placeholder="Code"
+                            value={approveCodes[r.id] ?? ''}
+                            onChange={e => setApproveCodes(prev => ({ ...prev, [r.id]: e.target.value }))} />
+                          <button className="action-btn restore" onClick={() => approveRequest(r.id)} disabled={approving[r.id]}>
+                            {approving[r.id] ? '…' : 'Approve'}
+                          </button>
+                        </div>
+                        {requestErrors[r.id] && <div style={{color:'#C0392B', fontSize:'0.65rem', marginTop:4}}>{requestErrors[r.id]}</div>}
+                      </>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>

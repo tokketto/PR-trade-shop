@@ -128,6 +128,7 @@ header { background: var(--brown); padding: 0 3rem; display: flex; align-items: 
 .code-pill { font-family: monospace; background: var(--cream-dark); padding: 0.2rem 0.5rem; border-radius: 2px; font-size: 0.8rem; color: var(--brown); }
 .status-active { color: #2E7D32; font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; }
 .status-revoked { color: #C0392B; font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; }
+.status-pending { color: var(--gold); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; }
 .action-btn { font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; background: none; border: 1px solid var(--border); color: var(--text-light); padding: 0.3rem 0.7rem; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
 .action-btn.revoke:hover { border-color: #C0392B; color: #C0392B; }
 .action-btn.restore:hover { border-color: #2E7D32; color: #2E7D32; }

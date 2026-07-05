@@ -5,6 +5,7 @@ export type Partner = {
   code: string
   active: boolean
   isAdmin?: boolean
+  shippingAddress?: string
 }
 
 const PARTNERS_KEY = 'partners'

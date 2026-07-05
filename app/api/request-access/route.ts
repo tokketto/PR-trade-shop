@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { addAccessRequest, getAccessRequests } from '@/lib/access-requests'
+import { addAccessRequest, getAccessRequests, saveAccessRequests } from '@/lib/access-requests'
+import { getPartners, savePartners } from '@/lib/partners'
 import { isAdminRequest } from '@/lib/session'
 
 export async function GET(req: NextRequest) {
@@ -8,6 +9,42 @@ export async function GET(req: NextRequest) {
   }
   const requests = await getAccessRequests()
   return NextResponse.json(requests)
+}
+
+export async function PATCH(req: NextRequest) {
+  if (!isAdminRequest(req)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const { id, code } = await req.json()
+
+  if (!id || !code?.trim()) {
+    return NextResponse.json({ error: 'An access code is required' }, { status: 400 })
+  }
+
+  try {
+    const requests = await getAccessRequests()
+    const target = requests.find(r => r.id === id)
+    if (!target) {
+      return NextResponse.json({ error: 'Request not found' }, { status: 404 })
+    }
+
+    const partners = await getPartners()
+    if (partners.some(p => p.code === code.trim())) {
+      return NextResponse.json({ error: 'That code is already in use' }, { status: 409 })
+    }
+
+    const updatedPartners = [...partners, { name: target.company, code: code.trim(), active: true }]
+    await savePartners(updatedPartners)
+
+    const updatedRequests = requests.map(r => r.id === id ? { ...r, status: 'approved' as const } : r)
+    await saveAccessRequests(updatedRequests)
+
+    return NextResponse.json({ partners: updatedPartners, requests: updatedRequests })
+  } catch (err) {
+    console.error('Approve request error:', err)
+    return NextResponse.json({ error: 'Could not save — database unavailable' }, { status: 500 })
+  }
 }
 
 export async function POST(req: NextRequest) {
