@@ -184,7 +184,10 @@ export default function AdminPage() {
       </header>
 
       <div className="admin-wrap">
-        <button className="admin-back" onClick={() => router.push('/shop')}>← View Shop</button>
+        <div style={{display:'flex', gap:'0.8rem', marginBottom:'2rem'}}>
+          <button className="admin-back" onClick={() => router.push('/shop')}>← View Shop</button>
+          <button className="admin-back" onClick={() => router.push('/admin/products')}>Manage Products →</button>
+        </div>
         <div className="admin-title">Partner Access Manager</div>
         <div className="admin-sub">
           Codes are stored in your database and take effect immediately — no redeploy needed. Revoking a

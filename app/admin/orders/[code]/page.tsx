@@ -3,13 +3,14 @@ import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import type { Partner } from '@/lib/partners'
 import type { Order } from '@/lib/orders'
-import { products } from '@/lib/products'
+import type { Product } from '@/lib/catalog'
 
 export default function PartnerOrdersPage() {
   const router = useRouter()
   const params = useParams<{ code: string }>()
   const [partner, setPartner] = useState<Partner | null>(null)
   const [orders, setOrders] = useState<Order[]>([])
+  const [products, setProducts] = useState<Product[]>([])
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
@@ -20,9 +21,12 @@ export default function PartnerOrdersPage() {
 
     const code = decodeURIComponent(params.code)
 
-    fetch('/api/partners')
-      .then(r => r.json())
-      .then(async (partners: Partner[]) => {
+    Promise.all([
+      fetch('/api/partners').then(r => r.json()),
+      fetch('/api/products').then(r => r.json()),
+    ])
+      .then(async ([partners, productsData]: [Partner[], Product[]]) => {
+        setProducts(Array.isArray(productsData) ? productsData : [])
         const p = Array.isArray(partners) ? partners.find(x => x.code === code) : undefined
         setPartner(p ?? null)
         if (p) {

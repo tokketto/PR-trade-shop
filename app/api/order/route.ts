@@ -1,26 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { products } from '@/lib/products'
+import { getProducts, saveProducts } from '@/lib/catalog'
 import { getPartners } from '@/lib/partners'
 import { addOrder } from '@/lib/orders'
-
-const KV_URL = process.env.KV_REST_API_URL
-const KV_TOKEN = process.env.KV_REST_API_TOKEN
-
-async function kvGet(key: string): Promise<number | null> {
-  const res = await fetch(`${KV_URL}/get/${key}`, {
-    headers: { Authorization: `Bearer ${KV_TOKEN}` },
-    cache: 'no-store',
-  })
-  const data = await res.json()
-  return data.result !== null ? parseInt(data.result) : null
-}
-
-async function kvSet(key: string, value: number) {
-  await fetch(`${KV_URL}/set/${key}/${value}`, {
-    method: 'GET',
-    headers: { Authorization: `Bearer ${KV_TOKEN}` },
-  })
-}
 
 export async function POST(req: NextRequest) {
   const { partnerName, items } = await req.json()
@@ -35,19 +16,16 @@ export async function POST(req: NextRequest) {
     console.error('Failed to persist order:', err)
   }
 
-  // Decrease inventory in KV
-  for (const item of items) {
-    const product = products.find(p => p.code === item.code)
-    if (!product) continue
-
-    const key = `inv:${product.sku}`
-    let currentQty = await kvGet(key)
-
-    // If not in KV yet, use default from products.ts
-    if (currentQty === null) currentQty = product.qty
-
-    const newQty = Math.max(0, currentQty - item.qty)
-    await kvSet(key, newQty)
+  // Decrease quantities in the product catalog
+  try {
+    const products = await getProducts()
+    const updated = products.map(product => {
+      const item = items.find((i: { code: string; qty: number }) => i.code === product.code)
+      return item ? { ...product, qty: Math.max(0, product.qty - item.qty) } : product
+    })
+    await saveProducts(updated)
+  } catch (err) {
+    console.error('Failed to update product quantities:', err)
   }
 
   // Send email via Resend

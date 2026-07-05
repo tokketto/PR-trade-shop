@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { products, categoryLabels, type Product } from '@/lib/products'
+import { categoryLabels, type Product } from '@/lib/catalog'
 
 type CartItem = { qty: number }
 
@@ -15,8 +15,8 @@ export default function ShopPage() {
   const [qtys, setQtys] = useState<Record<string, number>>({})
   const [orderSent, setOrderSent] = useState(false)
   const [orderSending, setOrderSending] = useState(false)
-  const [inventory, setInventory] = useState<Record<string, number>>({})
-  const [invLoaded, setInvLoaded] = useState(false)
+  const [products, setProducts] = useState<Product[]>([])
+  const [productsLoaded, setProductsLoaded] = useState(false)
   const [lightbox, setLightbox] = useState<{ src: string; alt: string } | null>(null)
 
   useEffect(() => {
@@ -26,14 +26,13 @@ export default function ShopPage() {
     setPartnerName(p.name)
     setIsAdmin(!!p.isAdmin)
 
-    // Load live inventory from KV
-    fetch('/api/inventory')
+    fetch('/api/products')
       .then(r => r.json())
       .then(data => {
-        setInventory(data)
-        setInvLoaded(true)
+        setProducts(Array.isArray(data) ? data : [])
+        setProductsLoaded(true)
       })
-      .catch(() => setInvLoaded(true))
+      .catch(() => setProductsLoaded(true))
   }, [router])
 
   useEffect(() => {
@@ -43,19 +42,13 @@ export default function ShopPage() {
     return () => window.removeEventListener('keydown', onKey)
   }, [lightbox])
 
-  // Merge KV inventory with product defaults
-  const productsWithQty = products.map(p => ({
-    ...p,
-    qty: inventory[p.sku] !== undefined ? inventory[p.sku] : p.qty,
-  }))
-
   function logout() {
     fetch('/api/auth', { method: 'DELETE' })
     sessionStorage.removeItem('pr_partner')
     router.push('/')
   }
 
-  const filtered = filter === 'all' ? productsWithQty : productsWithQty.filter(p => p.category === filter)
+  const filtered = filter === 'all' ? products : products.filter(p => p.category === filter)
 
   function setQty(sku: string, val: number) {
     setQtys(prev => ({ ...prev, [sku]: val }))
@@ -72,14 +65,14 @@ export default function ShopPage() {
   const cartItems = Object.entries(cart).filter(([, v]) => v.qty > 0)
   const cartCount = cartItems.length
   const cartTotal = cartItems.reduce((sum, [sku, v]) => {
-    const p = productsWithQty.find(x => x.sku === sku)
+    const p = products.find(x => x.sku === sku)
     return sum + (p ? p.price * v.qty : 0)
   }, 0)
 
   async function submitOrder() {
     setOrderSending(true)
     const items = cartItems.map(([sku, v]) => {
-      const p = productsWithQty.find(x => x.sku === sku)
+      const p = products.find(x => x.sku === sku)
       return p ? { name: p.name, code: p.code, qty: v.qty } : null
     }).filter(Boolean)
 
@@ -95,9 +88,9 @@ export default function ShopPage() {
         return
       }
       setCart({})
-      // Refresh inventory after order
-      const updated = await fetch('/api/inventory').then(r => r.json())
-      setInventory(updated)
+      // Refresh product quantities after order
+      const updated = await fetch('/api/products').then(r => r.json())
+      setProducts(Array.isArray(updated) ? updated : [])
       setOrderSent(true)
     } catch {
       alert('Something went wrong. Please try again.')
@@ -105,7 +98,7 @@ export default function ShopPage() {
     setOrderSending(false)
   }
 
-  if (!partnerName || !invLoaded) return (
+  if (!partnerName || !productsLoaded) return (
     <div style={{minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:'var(--brown)'}}>
       <p style={{color:'var(--gold-light)', fontFamily:'Cormorant Garamond, serif', fontSize:'1.2rem', letterSpacing:'0.1em'}}>Loading…</p>
     </div>
@@ -215,7 +208,7 @@ export default function ShopPage() {
             <strong>{cartCount}</strong> items selected
             <div className="cart-items-list">
               {cartItems.map(([sku, v]) => {
-                const p = productsWithQty.find(x => x.sku === sku)
+                const p = products.find(x => x.sku === sku)
                 return p ? `${p.code} ×${v.qty}` : ''
               }).join('  ·  ')}
             </div>
