@@ -41,17 +41,32 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { code, active, shippingAddress, contactName, contactEmail } = await req.json()
+  const { code, newCode, name, active, shippingAddress, contactName, contactEmail } = await req.json()
 
-  if (!code || (typeof active !== 'boolean' && shippingAddress === undefined && contactName === undefined && contactEmail === undefined)) {
+  if (!code) {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
   }
 
   try {
     const partners = await getPartners()
+    const target = partners.find(p => p.code === code)
+    if (!target) {
+      return NextResponse.json({ error: 'Partner not found' }, { status: 404 })
+    }
+
+    const finalCode = newCode?.trim() ? newCode.trim() : code
+    if (finalCode !== code && partners.some(p => p.code === finalCode)) {
+      return NextResponse.json({ error: 'That code is already in use' }, { status: 409 })
+    }
+    if (name !== undefined && !name.trim()) {
+      return NextResponse.json({ error: 'Partner name cannot be empty' }, { status: 400 })
+    }
+
     const updated = partners.map(p => p.code === code
       ? {
           ...p,
+          code: finalCode,
+          ...(name?.trim() ? { name: name.trim() } : {}),
           ...(typeof active === 'boolean' ? { active } : {}),
           ...(shippingAddress !== undefined ? { shippingAddress } : {}),
           ...(contactName !== undefined ? { contactName } : {}),

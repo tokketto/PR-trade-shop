@@ -14,11 +14,12 @@ export default function AdminPage() {
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
 
+  const [nameDrafts, setNameDrafts] = useState<Record<string, string>>({})
+  const [codeDrafts, setCodeDrafts] = useState<Record<string, string>>({})
   const [addressDrafts, setAddressDrafts] = useState<Record<string, string>>({})
-  const [addressSaving, setAddressSaving] = useState<Record<string, boolean>>({})
-
-  const [contactDrafts, setContactDrafts] = useState<Record<string, { name: string; email: string }>>({})
-  const [contactSaving, setContactSaving] = useState<Record<string, boolean>>({})
+  const [contactNameDrafts, setContactNameDrafts] = useState<Record<string, string>>({})
+  const [contactEmailDrafts, setContactEmailDrafts] = useState<Record<string, string>>({})
+  const [rowSaving, setRowSaving] = useState<Record<string, boolean>>({})
 
   const [approveCodes, setApproveCodes] = useState<Record<string, string>>({})
   const [approving, setApproving] = useState<Record<string, boolean>>({})
@@ -68,21 +69,29 @@ export default function AdminPage() {
     await updatePartner({ code, active: true })
   }
 
-  async function saveAddress(code: string) {
-    const shippingAddress = (addressDrafts[code] ?? '').trim()
-    setAddressSaving(prev => ({ ...prev, [code]: true }))
-    await updatePartner({ code, shippingAddress })
-    setAddressSaving(prev => ({ ...prev, [code]: false }))
+  function clearDrafts(code: string) {
+    setNameDrafts(prev => { const c = { ...prev }; delete c[code]; return c })
+    setCodeDrafts(prev => { const c = { ...prev }; delete c[code]; return c })
+    setAddressDrafts(prev => { const c = { ...prev }; delete c[code]; return c })
+    setContactNameDrafts(prev => { const c = { ...prev }; delete c[code]; return c })
+    setContactEmailDrafts(prev => { const c = { ...prev }; delete c[code]; return c })
   }
 
-  async function saveContact(code: string) {
-    const partner = partners.find(p => p.code === code)
-    const draft = contactDrafts[code]
-    const contactName = (draft?.name ?? partner?.contactName ?? '').trim()
-    const contactEmail = (draft?.email ?? partner?.contactEmail ?? '').trim()
-    setContactSaving(prev => ({ ...prev, [code]: true }))
-    await updatePartner({ code, contactName, contactEmail })
-    setContactSaving(prev => ({ ...prev, [code]: false }))
+  async function saveRow(originalCode: string) {
+    const p = partners.find(x => x.code === originalCode)
+    if (!p) return
+    const name = (nameDrafts[originalCode] ?? p.name).trim()
+    const newCode = (codeDrafts[originalCode] ?? p.code).trim()
+    const contactName = (contactNameDrafts[originalCode] ?? p.contactName ?? '').trim()
+    const contactEmail = (contactEmailDrafts[originalCode] ?? p.contactEmail ?? '').trim()
+    const shippingAddress = (addressDrafts[originalCode] ?? p.shippingAddress ?? '').trim()
+
+    if (!name || !newCode) { setError('Partner name and access code cannot be empty.'); return }
+
+    setRowSaving(prev => ({ ...prev, [originalCode]: true }))
+    const ok = await updatePartner({ code: originalCode, newCode, name, contactName, contactEmail, shippingAddress })
+    if (ok) clearDrafts(originalCode)
+    setRowSaving(prev => ({ ...prev, [originalCode]: false }))
   }
 
   async function addPartner() {
@@ -156,8 +165,9 @@ export default function AdminPage() {
         <div className="admin-title">Partner Access Manager</div>
         <div className="admin-sub">
           Codes are stored in your database and take effect immediately — no redeploy needed. Revoking a
-          partner disables their code right away. Contact info is filled in automatically when approving an
-          access request; shipping address is entered manually. Both appear on order emails.
+          partner disables their code right away. Edit a partner&apos;s name or code directly to fix a typo or
+          avoid a duplicate, then hit Save. Contact info is filled in automatically when approving an access
+          request; shipping address is entered manually. Both appear on order emails.
         </div>
 
         <table className="admin-table">
@@ -168,37 +178,46 @@ export default function AdminPage() {
               <th>Status</th>
               <th>Contact</th>
               <th>Shipping Address</th>
+              <th>Save</th>
               <th>Action</th>
             </tr>
           </thead>
           <tbody>
             {partners.map((p) => (
               <tr key={p.code}>
-                <td>{p.name}{p.isAdmin && <span style={{fontSize:'0.65rem',color:'var(--gold)',marginLeft:6}}>ADMIN</span>}</td>
-                <td><span className="code-pill">{p.code}</span></td>
+                <td>
+                  <input className="admin-input" style={{minWidth:130}}
+                    value={nameDrafts[p.code] ?? p.name}
+                    onChange={e => setNameDrafts(prev => ({ ...prev, [p.code]: e.target.value }))}
+                    disabled={p.isAdmin} />
+                  {p.isAdmin && <span style={{fontSize:'0.65rem',color:'var(--gold)',marginLeft:6}}>ADMIN</span>}
+                </td>
+                <td>
+                  <input className="admin-input" style={{minWidth:110}}
+                    value={codeDrafts[p.code] ?? p.code}
+                    onChange={e => setCodeDrafts(prev => ({ ...prev, [p.code]: e.target.value }))}
+                    disabled={p.isAdmin} />
+                </td>
                 <td><span className={p.active ? 'status-active' : 'status-revoked'}>{p.active ? 'Active' : 'Revoked'}</span></td>
                 <td>
                   <div style={{display:'flex', flexDirection:'column', gap:'0.3rem', minWidth:170}}>
                     <input className="admin-input" placeholder="Contact name"
-                      value={contactDrafts[p.code]?.name ?? p.contactName ?? ''}
-                      onChange={e => setContactDrafts(prev => ({ ...prev, [p.code]: { name: e.target.value, email: prev[p.code]?.email ?? p.contactEmail ?? '' } }))} />
+                      value={contactNameDrafts[p.code] ?? p.contactName ?? ''}
+                      onChange={e => setContactNameDrafts(prev => ({ ...prev, [p.code]: e.target.value }))} />
                     <input className="admin-input" placeholder="Contact email"
-                      value={contactDrafts[p.code]?.email ?? p.contactEmail ?? ''}
-                      onChange={e => setContactDrafts(prev => ({ ...prev, [p.code]: { name: prev[p.code]?.name ?? p.contactName ?? '', email: e.target.value } }))} />
-                    <button className="action-btn" onClick={() => saveContact(p.code)} disabled={contactSaving[p.code]}>
-                      {contactSaving[p.code] ? '…' : 'Save'}
-                    </button>
+                      value={contactEmailDrafts[p.code] ?? p.contactEmail ?? ''}
+                      onChange={e => setContactEmailDrafts(prev => ({ ...prev, [p.code]: e.target.value }))} />
                   </div>
                 </td>
                 <td>
-                  <div style={{display:'flex', gap:'0.4rem', alignItems:'center'}}>
-                    <input className="admin-input" style={{minWidth:160}} placeholder="Not on file"
-                      value={addressDrafts[p.code] ?? p.shippingAddress ?? ''}
-                      onChange={e => setAddressDrafts(prev => ({ ...prev, [p.code]: e.target.value }))} />
-                    <button className="action-btn" onClick={() => saveAddress(p.code)} disabled={addressSaving[p.code]}>
-                      {addressSaving[p.code] ? '…' : 'Save'}
-                    </button>
-                  </div>
+                  <input className="admin-input" style={{minWidth:160}} placeholder="Not on file"
+                    value={addressDrafts[p.code] ?? p.shippingAddress ?? ''}
+                    onChange={e => setAddressDrafts(prev => ({ ...prev, [p.code]: e.target.value }))} />
+                </td>
+                <td>
+                  <button className="action-btn" onClick={() => saveRow(p.code)} disabled={rowSaving[p.code]}>
+                    {rowSaving[p.code] ? '…' : 'Save'}
+                  </button>
                 </td>
                 <td>
                   {p.isAdmin ? '—' : p.active
