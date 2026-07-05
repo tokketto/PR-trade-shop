@@ -46,7 +46,7 @@ export default function PartnerOrdersPage() {
       totals.set(item.code, existing)
     }
   }
-  const totalValue = [...totals.values()].reduce((sum, t) => sum + t.value, 0)
+  const totalValue = Array.from(totals.values()).reduce((sum, t) => sum + t.value, 0)
 
   function logout() {
     fetch('/api/auth', { method: 'DELETE' })
@@ -106,7 +106,7 @@ export default function PartnerOrdersPage() {
               </tr>
             </thead>
             <tbody>
-              {[...totals.entries()].map(([code, t]) => (
+              {Array.from(totals.entries()).map(([code, t]) => (
                 <tr key={code}>
                   <td>{t.name} <span style={{color:'var(--text-light)', fontSize:'0.72rem'}}>({code})</span></td>
                   <td>{t.qty}</td>
