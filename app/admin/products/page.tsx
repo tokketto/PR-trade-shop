@@ -176,13 +176,13 @@ export default function ProductsPage() {
             {products.map(p => (
               <tr key={p.sku}>
                 <td>
-                  {draftValue(p, 'img') && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={draftValue(p, 'img')} alt={p.name} style={{width:56, height:56, objectFit:'cover', display:'block'}} />
-                  )}
-                  <input className="admin-input" style={{minWidth:160, marginTop:'0.4rem'}} placeholder="Image URL"
+                  <input className="admin-input" style={{minWidth:160}} placeholder="Image URL"
                     value={draftValue(p, 'img')}
                     onChange={e => setDraft(p.sku, 'img', e.target.value)} />
+                  {draftValue(p, 'img') && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={draftValue(p, 'img')} alt={p.name} style={{width:56, height:56, objectFit:'cover', display:'block', marginTop:'0.4rem'}} />
+                  )}
                 </td>
                 <td>
                   <input className="admin-input" style={{minWidth:150}}
