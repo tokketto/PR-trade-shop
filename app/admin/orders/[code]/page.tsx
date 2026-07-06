@@ -112,7 +112,7 @@ export default function PartnerOrdersPage() {
             <tbody>
               {Array.from(totals.entries()).map(([code, t]) => (
                 <tr key={code}>
-                  <td>{t.name} <span style={{color:'var(--text-light)', fontSize:'0.72rem'}}>({code})</span></td>
+                  <td>{t.name} <span style={{color:'var(--text-light)', fontSize:'1rem'}}>({code})</span></td>
                   <td>{t.qty}</td>
                   <td>${t.value.toFixed(2)}</td>
                 </tr>
@@ -133,7 +133,7 @@ export default function PartnerOrdersPage() {
         ) : (
           orders.slice().reverse().map(order => (
             <div key={order.id} style={{marginBottom:'1.5rem', background:'var(--white)', border:'1px solid var(--border)', padding:'1.2rem 1.5rem'}}>
-              <div style={{fontSize:'0.72rem', color:'var(--text-light)', marginBottom:'0.8rem', textTransform:'uppercase', letterSpacing:'0.08em'}}>
+              <div style={{fontSize:'1rem', color:'var(--text-light)', marginBottom:'0.8rem', textTransform:'uppercase', letterSpacing:'0.08em'}}>
                 {new Date(order.submittedAt).toLocaleString()}
               </div>
               <table className="admin-table">

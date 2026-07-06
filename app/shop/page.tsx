@@ -131,7 +131,7 @@ export default function ShopPage() {
       </header>
       <div style={{minHeight:'calc(100vh - 72px)', display:'flex', alignItems:'center', justifyContent:'center', background:'var(--brown)'}}>
         <div style={{background:'var(--cream)', padding:'3.5rem', maxWidth:'480px', width:'90%', textAlign:'center', borderTop:'3px solid var(--gold)'}}>
-          <div style={{fontSize:'0.65rem', letterSpacing:'0.28em', textTransform:'uppercase', color:'var(--gold)', marginBottom:'1.2rem'}}>Order Received</div>
+          <div style={{fontSize:'1rem', letterSpacing:'0.28em', textTransform:'uppercase', color:'var(--gold)', marginBottom:'1.2rem'}}>Order Received</div>
           <div style={{fontFamily:'Cormorant Garamond, serif', fontSize:'2rem', fontWeight:300, color:'var(--brown)', marginBottom:'1rem'}}>Thank you, {partnerName}</div>
           <div style={{width:40, height:1, background:'var(--gold)', margin:'0 auto 1.5rem'}}></div>
           <p style={{fontSize:'1rem', color:'var(--text-light)', lineHeight:1.7, marginBottom:'2rem'}}>

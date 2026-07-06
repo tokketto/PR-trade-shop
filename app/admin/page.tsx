@@ -216,7 +216,7 @@ export default function AdminPage() {
                     value={nameDrafts[p.code] ?? p.name}
                     onChange={e => setNameDrafts(prev => ({ ...prev, [p.code]: e.target.value }))}
                     disabled={p.isAdmin} />
-                  {p.isAdmin && <span style={{fontSize:'0.65rem',color:'var(--gold)',marginLeft:6}}>ADMIN</span>}
+                  {p.isAdmin && <span style={{fontSize:'1rem',color:'var(--gold)',marginLeft:6}}>ADMIN</span>}
                 </td>
                 <td>
                   <input className="admin-input" style={{minWidth:110}}
@@ -305,7 +305,7 @@ export default function AdminPage() {
                         {approving[r.id] ? '…' : 'Approve'}
                       </button>
                     </div>
-                    {requestErrors[r.id] && <div style={{color:'#C0392B', fontSize:'0.65rem', marginTop:4}}>{requestErrors[r.id]}</div>}
+                    {requestErrors[r.id] && <div style={{color:'#C0392B', fontSize:'1rem', marginTop:4}}>{requestErrors[r.id]}</div>}
                   </td>
                 </tr>
               ))}
