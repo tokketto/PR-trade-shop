@@ -202,12 +202,12 @@ export default function ProductsPage() {
                   </select>
                 </td>
                 <td>
-                  <input className="admin-input" type="number" step="0.01" style={{minWidth:80}}
+                  <input className="admin-input" type="number" step="0.01" style={{width:'4.5rem', minWidth:0}}
                     value={draftValue(p, 'price')}
                     onChange={e => setDraft(p.sku, 'price', e.target.value)} />
                 </td>
                 <td>
-                  <input className="admin-input" type="number" style={{minWidth:70}}
+                  <input className="admin-input" type="number" style={{width:'5.5rem', minWidth:0}}
                     value={draftValue(p, 'qty')}
                     onChange={e => setDraft(p.sku, 'qty', e.target.value)} />
                 </td>
