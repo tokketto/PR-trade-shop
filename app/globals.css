@@ -169,14 +169,14 @@ header { background: var(--brown); padding: 0 3rem; display: flex; align-items: 
 .login-link-btn:hover { color: var(--brown); }
 
 /* ADMIN */
-.admin-wrap { min-height: calc(100vh - 72px); background: var(--cream); padding: 3rem; }
+.admin-wrap { min-height: calc(100vh - 72px); background: var(--cream); padding: 3rem; overflow-x: auto; }
 .admin-back { display: inline-block; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); background: none; border: 1px solid var(--gold); padding: 0.5rem 1rem; cursor: pointer; font-family: 'Assistant', sans-serif; margin-bottom: 2rem; transition: all 0.2s; }
 .admin-back:hover { background: var(--gold); color: var(--brown); }
 .admin-title { font-family: 'Baskerville PR', serif; font-size: 2rem; font-weight: 400; color: var(--brown); margin-bottom: 0.3rem; }
 .admin-sub { font-size: 0.78rem; color: var(--text-light); margin-bottom: 2.5rem; }
-.admin-table { width: 100%; max-width: 800px; border-collapse: collapse; background: var(--white); border: 1px solid var(--border); }
-.admin-table th { background: var(--brown); color: var(--gold-light); font-size: 0.65rem; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 400; padding: 0.9rem 1.2rem; text-align: left; }
-.admin-table td { padding: 0.85rem 1.2rem; border-bottom: 1px solid var(--border); font-size: 0.82rem; color: var(--text); vertical-align: middle; }
+.admin-table { width: 100%; min-width: 800px; border-collapse: collapse; background: var(--white); border: 1px solid var(--border); }
+.admin-table th { background: var(--brown); color: var(--gold-light); font-size: 0.65rem; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 400; padding: 0.9rem 1.2rem; text-align: left; white-space: nowrap; }
+.admin-table td { padding: 0.85rem 1.2rem; border-bottom: 1px solid var(--border); font-size: 0.82rem; color: var(--text); vertical-align: top; }
 .admin-table tr:last-child td { border-bottom: none; }
 .code-pill { font-family: monospace; background: var(--cream-dark); padding: 0.2rem 0.5rem; border-radius: 2px; font-size: 0.8rem; color: var(--brown); }
 .status-active { color: #2E7D32; font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; }
