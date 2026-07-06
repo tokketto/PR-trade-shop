@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
         <p style="font-size: 0.9rem; color: #6B4C38; margin-bottom: 1.5rem;">
           A new order has been submitted by <strong>${partnerName}</strong>.
         </p>
-        <p style="font-size: 0.85rem; color: #6B4C38; margin-bottom: 1.5rem;">
+        <p style="font-size: 1rem; color: #6B4C38; margin-bottom: 1.5rem;">
           <strong>Shipping address:</strong> ${shippingAddress || 'Not on file — check with the partner before shipping.'}
         </p>
         <table style="width: 100%; border-collapse: collapse; background: #FDFAF4; border: 1px solid #D9C9A8;">
@@ -133,10 +133,10 @@ export async function POST(req: NextRequest) {
             </thead>
             <tbody>${itemRows}</tbody>
           </table>
-          <p style="font-size: 0.85rem; color: #6B4C38; margin-top: 1.5rem;">
+          <p style="font-size: 1rem; color: #6B4C38; margin-top: 1.5rem;">
             This is an estimate only — your final total will reflect shipping and packing costs, confirmed before invoicing.
           </p>
-          <p style="font-size: 0.85rem; color: #6B4C38; margin-top: 1rem;">
+          <p style="font-size: 1rem; color: #6B4C38; margin-top: 1rem;">
             Spot a mistake or want to add something? Just reply to this email and we&rsquo;ll take care of it before your order is processed.
           </p>
         </div>

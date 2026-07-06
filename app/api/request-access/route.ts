@@ -62,11 +62,11 @@ export async function PATCH(req: NextRequest) {
             <p style="font-size: 0.9rem; color: #6B4C38; margin-bottom: 1.5rem;">
               Welcome, ${target.firstName}! Your request for <strong>${target.company}</strong> has been approved.
             </p>
-            <p style="font-size: 0.85rem; color: #8C6E5A; margin-bottom: 0.5rem;">Your access code</p>
+            <p style="font-size: 1rem; color: #8C6E5A; margin-bottom: 0.5rem;">Your access code</p>
             <p style="font-size: 1.4rem; letter-spacing: 0.1em; color: #2C1F14; background: #FDFAF4; border: 1px solid #D9C9A8; padding: 0.9rem 1.2rem; text-align: center; margin-bottom: 1.5rem;">
               ${code.trim()}
             </p>
-            <p style="font-size: 0.85rem; color: #6B4C38;">
+            <p style="font-size: 1rem; color: #6B4C38;">
               Head to <a href="${loginUrl}" style="color: #B8963E;">${loginUrl}</a> and enter this code to start browsing the trade collection.
             </p>
           </div>

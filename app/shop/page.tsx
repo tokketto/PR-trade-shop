@@ -119,7 +119,7 @@ export default function ShopPage() {
           <div style={{fontSize:'0.65rem', letterSpacing:'0.28em', textTransform:'uppercase', color:'var(--gold)', marginBottom:'1.2rem'}}>Order Received</div>
           <div style={{fontFamily:'Cormorant Garamond, serif', fontSize:'2rem', fontWeight:300, color:'var(--brown)', marginBottom:'1rem'}}>Thank you, {partnerName}</div>
           <div style={{width:40, height:1, background:'var(--gold)', margin:'0 auto 1.5rem'}}></div>
-          <p style={{fontSize:'0.85rem', color:'var(--text-light)', lineHeight:1.7, marginBottom:'2rem'}}>
+          <p style={{fontSize:'1rem', color:'var(--text-light)', lineHeight:1.7, marginBottom:'2rem'}}>
             Your order has been submitted for review. You will receive a direct email with a confirmation and a payment link shortly.
           </p>
           <button className="login-btn" onClick={() => setOrderSent(false)} style={{width:'100%'}}>

@@ -84,7 +84,7 @@ header { background: var(--brown); padding: 0 3rem; display: flex; align-items: 
 .hero-eyebrow { font-size: 0.68rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold-light); margin-bottom: 1.5rem; }
 .hero h1 { font-family: 'Baskerville PR', serif; font-size: clamp(2.8rem, 6vw, 4.5rem); font-weight: 400; line-height: 1.1; color: var(--cream); margin-bottom: 1rem; }
 .hero h1 em { font-style: italic; color: var(--gold-light); }
-.hero p { font-size: 0.85rem; letter-spacing: 0.08em; color: var(--cream-dark); opacity: 0.8; max-width: 520px; margin: 0 auto; }
+.hero p { font-size: 1rem; letter-spacing: 0.08em; color: var(--cream-dark); opacity: 0.8; max-width: 520px; margin: 0 auto; }
 .hero-rule { width: 60px; height: 1px; background: var(--gold); margin: 1.8rem auto; }
 .hero-partner { font-size: 0.7rem; letter-spacing: 0.15em; color: var(--gold); margin-top: 1.5rem; text-transform: uppercase; }
 
@@ -183,7 +183,7 @@ header { background: var(--brown); padding: 0 3rem; display: flex; align-items: 
 .action-btn.revoke:hover { border-color: #C0392B; color: #C0392B; }
 .action-btn.restore:hover { border-color: #2E7D32; color: #2E7D32; }
 .add-partner-row { display: flex; gap: 0.8rem; margin-top: 1.5rem; max-width: 800px; flex-wrap: wrap; }
-.admin-input { padding: 0.7rem 0.9rem; border: 1px solid var(--border); background: var(--white); font-family: 'Assistant', sans-serif; font-size: 0.85rem; color: var(--brown); outline: none; flex: 1; min-width: 140px; }
+.admin-input { padding: 0.7rem 0.9rem; border: 1px solid var(--border); background: var(--white); font-family: 'Assistant', sans-serif; font-size: 1rem; color: var(--brown); outline: none; flex: 1; min-width: 140px; }
 .admin-input:focus { border-color: var(--gold); }
 .admin-add-btn { padding: 0.7rem 1.4rem; background: var(--brown); color: var(--gold-light); font-family: 'Parmigiano Reggiano', serif; font-weight: 700; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; border: none; cursor: pointer; }
 .admin-add-btn:hover { background: var(--brown-mid); }
