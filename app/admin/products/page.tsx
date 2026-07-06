@@ -155,6 +155,7 @@ export default function ProductsPage() {
           picker — the Variant Label (e.g. &quot;Small&quot;) is what shows in that picker.
         </div>
 
+        <div className="table-scroll">
         <table className="admin-table">
           <thead>
             <tr>
@@ -239,6 +240,7 @@ export default function ProductsPage() {
             ))}
           </tbody>
         </table>
+        </div>
 
         <div className="admin-title" style={{fontSize:'1.4rem', marginTop:'3rem'}}>Add Product</div>
         <div className="admin-sub">

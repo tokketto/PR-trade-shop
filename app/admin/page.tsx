@@ -196,6 +196,7 @@ export default function AdminPage() {
           request; shipping address is entered manually. Both appear on order emails.
         </div>
 
+        <div className="table-scroll">
         <table className="admin-table">
           <thead>
             <tr>
@@ -258,6 +259,7 @@ export default function AdminPage() {
             ))}
           </tbody>
         </table>
+        </div>
 
         <div className="add-partner-row">
           <input className="admin-input" placeholder="Partner name" value={newName} onChange={e => setNewName(e.target.value)} />
@@ -279,6 +281,7 @@ export default function AdminPage() {
         {pendingRequests.length === 0 ? (
           <div className="admin-note">No pending requests.</div>
         ) : (
+          <div className="table-scroll">
           <table className="admin-table">
             <thead>
               <tr>
@@ -311,6 +314,7 @@ export default function AdminPage() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
 

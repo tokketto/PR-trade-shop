@@ -101,6 +101,7 @@ export default function PartnerOrdersPage() {
         {totals.size === 0 ? (
           <div className="admin-note">No orders yet.</div>
         ) : (
+          <div className="table-scroll">
           <table className="admin-table">
             <thead>
               <tr>
@@ -124,6 +125,7 @@ export default function PartnerOrdersPage() {
               </tr>
             </tbody>
           </table>
+          </div>
         )}
 
         <div className="admin-title" style={{fontSize:'1.4rem', marginTop:'2.5rem'}}>Order History</div>
@@ -136,6 +138,7 @@ export default function PartnerOrdersPage() {
               <div style={{fontSize:'1rem', color:'var(--text-light)', marginBottom:'0.8rem', textTransform:'uppercase', letterSpacing:'0.08em'}}>
                 {new Date(order.submittedAt).toLocaleString()}
               </div>
+              <div className="table-scroll">
               <table className="admin-table">
                 <thead>
                   <tr><th>Item</th><th>Code</th><th>Qty</th></tr>
@@ -146,6 +149,7 @@ export default function PartnerOrdersPage() {
                   ))}
                 </tbody>
               </table>
+              </div>
             </div>
           ))
         )}

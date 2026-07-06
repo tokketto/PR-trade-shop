@@ -169,11 +169,12 @@ header { background: var(--brown); padding: 0 3rem; display: flex; align-items: 
 .login-link-btn:hover { color: var(--brown); }
 
 /* ADMIN */
-.admin-wrap { min-height: calc(100vh - 72px); background: var(--cream); padding: 3rem; overflow-x: auto; }
+.admin-wrap { min-height: calc(100vh - 72px); background: var(--cream); padding: 3rem; }
 .admin-back { display: inline-block; font-size: 1rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); background: none; border: 1px solid var(--gold); padding: 0.5rem 1rem; cursor: pointer; font-family: 'Assistant', sans-serif; margin-bottom: 2rem; transition: all 0.2s; }
 .admin-back:hover { background: var(--gold); color: var(--brown); }
 .admin-title { font-family: 'Baskerville PR', serif; font-size: 2rem; font-weight: 400; color: var(--brown); margin-bottom: 0.3rem; }
 .admin-sub { font-size: 1rem; color: var(--text-light); margin-bottom: 2.5rem; }
+.table-scroll { overflow-x: auto; max-width: 100%; }
 .admin-table { width: 100%; min-width: 800px; border-collapse: collapse; background: var(--white); border: 1px solid var(--border); }
 .admin-table th { background: var(--brown); color: var(--gold-light); font-size: 1rem; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 400; padding: 0.9rem 1.2rem; text-align: left; white-space: nowrap; }
 .admin-table td { padding: 0.85rem 1.2rem; border-bottom: 1px solid var(--border); font-size: 1rem; color: var(--text); vertical-align: top; }
