@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { name, code, sku, category, price, img, priceNote, description, qty } = await req.json()
+  const { name, code, sku, category, price, img, priceNote, description, qty, variantGroup, variantLabel } = await req.json()
 
   if (!name?.trim() || !code?.trim() || !sku?.trim() || !category || price === undefined || !img?.trim()) {
     return NextResponse.json({ error: 'Name, code, SKU, category, price, and image are required' }, { status: 400 })
@@ -37,6 +37,8 @@ export async function POST(req: NextRequest) {
       price: Number(price),
       ...(priceNote?.trim() ? { priceNote: priceNote.trim() } : {}),
       ...(description?.trim() ? { description: description.trim() } : {}),
+      ...(variantGroup?.trim() ? { variantGroup: variantGroup.trim() } : {}),
+      ...(variantLabel?.trim() ? { variantLabel: variantLabel.trim() } : {}),
     }
 
     const updated = [...products, newProduct]
@@ -53,7 +55,7 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { sku, name, code, category, price, img, priceNote, description, qty } = await req.json()
+  const { sku, name, code, category, price, img, priceNote, description, qty, variantGroup, variantLabel } = await req.json()
 
   if (!sku) {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
@@ -83,6 +85,8 @@ export async function PATCH(req: NextRequest) {
           ...(priceNote !== undefined ? { priceNote: priceNote.trim() || undefined } : {}),
           ...(description !== undefined ? { description: description.trim() || undefined } : {}),
           ...(qty !== undefined ? { qty: Math.max(0, Number(qty)) } : {}),
+          ...(variantGroup !== undefined ? { variantGroup: variantGroup.trim() || undefined } : {}),
+          ...(variantLabel !== undefined ? { variantLabel: variantLabel.trim() || undefined } : {}),
         }
       : p)
     await saveProducts(updated)

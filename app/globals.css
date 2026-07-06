@@ -121,6 +121,8 @@ header { background: var(--brown); padding: 0 3rem; display: flex; align-items: 
 .in-stock { background: #EAF4EA; color: #2E7D32; }
 .low-stock { background: #FDF0EE; color: #C0392B; }
 .stock-qty { font-size: 0.68rem; color: var(--text-light); }
+.variant-select { width: 100%; padding: 0.5rem 0.7rem; border: 1px solid var(--border); background: var(--cream); font-family: 'Assistant', sans-serif; font-size: 0.85rem; color: var(--brown); margin-bottom: 0.7rem; outline: none; cursor: pointer; }
+.variant-select:focus { border-color: var(--gold); }
 .qty-input-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.8rem; }
 .qty-label { font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-light); }
 .qty-stepper { display: flex; align-items: center; gap: 0.6rem; }

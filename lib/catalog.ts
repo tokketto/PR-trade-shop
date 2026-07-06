@@ -10,6 +10,10 @@ export type Product = {
   price: number
   priceNote?: string
   description?: string
+  // Products sharing the same variantGroup render as one card in the shop,
+  // with a size/option picker built from each variant's variantLabel.
+  variantGroup?: string
+  variantLabel?: string
 }
 
 export const categoryLabels: Record<string, string> = {
@@ -27,10 +31,10 @@ const SEED_PRODUCTS: Product[] = [
   // APPAREL
   { name: 'Apron (Polyester)', code: 'PR2504', sku: 'Adv_PR2504', qty: 122, category: 'apparel', img: 'https://res.cloudinary.com/w1ti71ox/image/upload/v1783186134/Apron_zxnefd.jpg', price: 18 },
   { name: 'Baseball Cap', code: 'PR2515', sku: 'Adv_PR2515', qty: 167, category: 'apparel', img: 'https://res.cloudinary.com/w1ti71ox/image/upload/v1783186258/Baseball-cap_iepdwm.jpg', price: 14 },
-  { name: 'T-Shirt Small', code: 'PR2509', sku: 'Adv_PR2509', qty: 55, category: 'apparel', img: 'https://res.cloudinary.com/w1ti71ox/image/upload/v1783186357/T-shirt_csnmgj.jpg', price: 16 },
-  { name: 'T-Shirt Medium', code: 'PR2510', sku: 'Adv_PR2510', qty: 54, category: 'apparel', img: 'https://res.cloudinary.com/w1ti71ox/image/upload/v1783186357/T-shirt_csnmgj.jpg', price: 16 },
-  { name: 'T-Shirt Large', code: 'PR2511', sku: 'Adv_PR2511', qty: 54, category: 'apparel', img: 'https://res.cloudinary.com/w1ti71ox/image/upload/v1783186357/T-shirt_csnmgj.jpg', price: 16 },
-  { name: 'T-Shirt Extra Large', code: 'PR2512', sku: 'Adv_PR2512', qty: 53, category: 'apparel', img: 'https://res.cloudinary.com/w1ti71ox/image/upload/v1783186357/T-shirt_csnmgj.jpg', price: 18 },
+  { name: 'T-Shirt', code: 'PR2509', sku: 'Adv_PR2509', qty: 55, category: 'apparel', img: 'https://res.cloudinary.com/w1ti71ox/image/upload/v1783186357/T-shirt_csnmgj.jpg', price: 16, variantGroup: 'tshirt', variantLabel: 'Small' },
+  { name: 'T-Shirt', code: 'PR2510', sku: 'Adv_PR2510', qty: 54, category: 'apparel', img: 'https://res.cloudinary.com/w1ti71ox/image/upload/v1783186357/T-shirt_csnmgj.jpg', price: 16, variantGroup: 'tshirt', variantLabel: 'Medium' },
+  { name: 'T-Shirt', code: 'PR2511', sku: 'Adv_PR2511', qty: 54, category: 'apparel', img: 'https://res.cloudinary.com/w1ti71ox/image/upload/v1783186357/T-shirt_csnmgj.jpg', price: 16, variantGroup: 'tshirt', variantLabel: 'Large' },
+  { name: 'T-Shirt', code: 'PR2512', sku: 'Adv_PR2512', qty: 53, category: 'apparel', img: 'https://res.cloudinary.com/w1ti71ox/image/upload/v1783186357/T-shirt_csnmgj.jpg', price: 18, variantGroup: 'tshirt', variantLabel: 'Extra Large' },
   // KNIVES
   { name: 'Knife — Flat Tip Professional', code: 'PR2604', sku: 'Adv_PR2604', qty: 85, category: 'knives', img: 'https://res.cloudinary.com/w1ti71ox/image/upload/v1783186376/ProfessionalKife-flatTip_zd6nfn.jpg', price: 32 },
   { name: 'Knife — Small Almond Consumer', code: 'PR2605', sku: 'Adv_PR2605', qty: 38, category: 'knives', img: 'https://res.cloudinary.com/w1ti71ox/image/upload/v1783186388/ProfessionalKnife-almond_eyga3f.jpg', price: 22 },

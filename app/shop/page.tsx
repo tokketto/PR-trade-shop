@@ -18,6 +18,7 @@ export default function ShopPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [productsLoaded, setProductsLoaded] = useState(false)
   const [lightbox, setLightbox] = useState<{ src: string; alt: string } | null>(null)
+  const [selectedVariant, setSelectedVariant] = useState<Record<string, string>>({})
 
   useEffect(() => {
     const session = sessionStorage.getItem('pr_partner')
@@ -49,6 +50,20 @@ export default function ShopPage() {
   }
 
   const filtered = filter === 'all' ? products : products.filter(p => p.category === filter)
+
+  // Group products that share a variantGroup into one display card each,
+  // preserving the position of the group's first occurrence in the catalog.
+  const displayItems: { key: string; variants: Product[] }[] = []
+  const seenGroups = new Set<string>()
+  for (const p of filtered) {
+    if (p.variantGroup) {
+      if (seenGroups.has(p.variantGroup)) continue
+      seenGroups.add(p.variantGroup)
+      displayItems.push({ key: p.variantGroup, variants: filtered.filter(x => x.variantGroup === p.variantGroup) })
+    } else {
+      displayItems.push({ key: p.sku, variants: [p] })
+    }
+  }
 
   function setQty(sku: string, val: number) {
     setQtys(prev => ({ ...prev, [sku]: val }))
@@ -162,12 +177,14 @@ export default function ShopPage() {
         <div className="section-label">Trade Collection</div>
         <div className="section-title">Available Inventory</div>
         <div className="product-grid">
-          {filtered.map(p => {
+          {displayItems.map(({ key, variants }) => {
+            const activeSku = selectedVariant[key] ?? variants[0].sku
+            const p = variants.find(v => v.sku === activeSku) ?? variants[0]
             const isLow = p.qty <= 10
             const isOut = p.qty === 0
             const qty = qtys[p.sku] ?? 1
             return (
-              <div className="product-card" key={p.sku}>
+              <div className="product-card" key={key}>
                 <div className="product-img-wrap" onClick={() => setLightbox({ src: p.img, alt: p.name })}>
                   <Image src={p.img} alt={p.name} fill style={{objectFit:'cover'}} sizes="(max-width:600px) 100vw, 33vw" />
                 </div>
@@ -176,6 +193,16 @@ export default function ShopPage() {
                   <div className="product-name">{p.name}</div>
                   <div className="product-code">{p.code} · {p.sku}</div>
                   <div className="product-price">{p.price === 0 ? 'FREE' : `$${p.price.toFixed(2)}`}{p.priceNote && <span className="price-note"> ({p.priceNote})</span>}</div>
+                  {variants.length > 1 && (
+                    <select className="variant-select" value={activeSku}
+                      onChange={e => setSelectedVariant(prev => ({ ...prev, [key]: e.target.value }))}>
+                      {variants.map(v => (
+                        <option key={v.sku} value={v.sku} disabled={v.qty === 0}>
+                          {v.variantLabel ?? v.name}{v.qty === 0 ? ' — Out of Stock' : ''}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                   <div className="stock-row">
                     <span className={`stock-badge ${isLow ? 'low-stock' : 'in-stock'}`}>
                       {isOut ? 'Out of Stock' : isLow ? 'Low Stock' : 'In Stock'}

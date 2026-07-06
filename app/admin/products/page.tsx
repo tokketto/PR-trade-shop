@@ -18,6 +18,7 @@ export default function ProductsPage() {
 
   const [newProduct, setNewProduct] = useState({
     name: '', code: '', sku: '', category: CATEGORIES[0], price: '', qty: '', img: '', priceNote: '', description: '',
+    variantGroup: '', variantLabel: '',
   })
   const [adding, setAdding] = useState(false)
 
@@ -115,7 +116,7 @@ export default function ProductsPage() {
       const data = await res.json()
       if (!res.ok) { setError(data.error || 'Something went wrong.'); setAdding(false); return }
       setProducts(data)
-      setNewProduct({ name: '', code: '', sku: '', category: CATEGORIES[0], price: '', qty: '', img: '', priceNote: '', description: '' })
+      setNewProduct({ name: '', code: '', sku: '', category: CATEGORIES[0], price: '', qty: '', img: '', priceNote: '', description: '', variantGroup: '', variantLabel: '' })
     } catch {
       setError('Something went wrong. Please try again.')
     }
@@ -149,7 +150,9 @@ export default function ProductsPage() {
         <div className="admin-title">Product Manager</div>
         <div className="admin-sub">
           Edit any field and hit Save. SKU is locked once a product is created — it&apos;s the internal identifier
-          tied to past inventory history, so it can&apos;t be changed to avoid orphaning records.
+          tied to past inventory history, so it can&apos;t be changed to avoid orphaning records. Give products the
+          same Variant Group (e.g. &quot;tshirt&quot;) to merge them into one card in the shop with a size/option
+          picker — the Variant Label (e.g. &quot;Small&quot;) is what shows in that picker.
         </div>
 
         <table className="admin-table">
@@ -163,6 +166,7 @@ export default function ProductsPage() {
               <th>Price</th>
               <th>Qty</th>
               <th>Description</th>
+              <th>Variant</th>
               <th>Save</th>
               <th>Action</th>
             </tr>
@@ -212,6 +216,16 @@ export default function ProductsPage() {
                     onChange={e => setDraft(p.sku, 'description', e.target.value)} />
                 </td>
                 <td>
+                  <div style={{display:'flex', flexDirection:'column', gap:'0.3rem', minWidth:130}}>
+                    <input className="admin-input" placeholder="Variant group"
+                      value={draftValue(p, 'variantGroup') ?? ''}
+                      onChange={e => setDraft(p.sku, 'variantGroup', e.target.value)} />
+                    <input className="admin-input" placeholder="Variant label"
+                      value={draftValue(p, 'variantLabel') ?? ''}
+                      onChange={e => setDraft(p.sku, 'variantLabel', e.target.value)} />
+                  </div>
+                </td>
+                <td>
                   <button className="action-btn" onClick={() => saveRow(p.sku)} disabled={rowSaving[p.sku]}>
                     {rowSaving[p.sku] ? '…' : 'Save'}
                   </button>
@@ -252,6 +266,10 @@ export default function ProductsPage() {
             onChange={e => setNewProduct(prev => ({ ...prev, priceNote: e.target.value }))} />
           <input className="admin-input" placeholder="Description (optional)" value={newProduct.description}
             onChange={e => setNewProduct(prev => ({ ...prev, description: e.target.value }))} />
+          <input className="admin-input" placeholder="Variant group (optional)" value={newProduct.variantGroup}
+            onChange={e => setNewProduct(prev => ({ ...prev, variantGroup: e.target.value }))} />
+          <input className="admin-input" placeholder="Variant label (optional)" value={newProduct.variantLabel}
+            onChange={e => setNewProduct(prev => ({ ...prev, variantLabel: e.target.value }))} />
           <button className="admin-add-btn" onClick={addProduct} disabled={adding}>{adding ? 'Adding…' : 'Add Product'}</button>
         </div>
         {error && <div className="login-error">{error}</div>}
