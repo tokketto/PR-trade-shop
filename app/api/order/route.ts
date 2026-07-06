@@ -52,10 +52,10 @@ export async function POST(req: NextRequest) {
         <h1 style="color: #D4AF5A; font-size: 1.4rem; font-weight: 400; letter-spacing: 0.15em; text-transform: uppercase; margin: 0;">
           Parmigiano Reggiano
         </h1>
-        <p style="color: #EDE5D0; font-size: 0.8rem; margin: 0.5rem 0 0; letter-spacing: 0.1em;">New Trade Order</p>
+        <p style="color: #EDE5D0; font-size: 1rem; margin: 0.5rem 0 0; letter-spacing: 0.1em;">New Trade Order</p>
       </div>
       <div style="padding: 2rem; background: #F7F2E8;">
-        <p style="font-size: 0.9rem; color: #6B4C38; margin-bottom: 1.5rem;">
+        <p style="font-size: 1rem; color: #6B4C38; margin-bottom: 1.5rem;">
           A new order has been submitted by <strong>${partnerName}</strong>.
         </p>
         <p style="font-size: 1rem; color: #6B4C38; margin-bottom: 1.5rem;">
@@ -64,19 +64,19 @@ export async function POST(req: NextRequest) {
         <table style="width: 100%; border-collapse: collapse; background: #FDFAF4; border: 1px solid #D9C9A8;">
           <thead>
             <tr style="background: #3D2B1F;">
-              <th style="padding: 10px 12px; color: #D4AF5A; font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; text-align: left; font-weight: 400;">Product</th>
-              <th style="padding: 10px 12px; color: #D4AF5A; font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; text-align: left; font-weight: 400;">Code</th>
-              <th style="padding: 10px 12px; color: #D4AF5A; font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; text-align: center; font-weight: 400;">Qty</th>
+              <th style="padding: 10px 12px; color: #D4AF5A; font-size: 1rem; letter-spacing: 0.15em; text-transform: uppercase; text-align: left; font-weight: 400;">Product</th>
+              <th style="padding: 10px 12px; color: #D4AF5A; font-size: 1rem; letter-spacing: 0.15em; text-transform: uppercase; text-align: left; font-weight: 400;">Code</th>
+              <th style="padding: 10px 12px; color: #D4AF5A; font-size: 1rem; letter-spacing: 0.15em; text-transform: uppercase; text-align: center; font-weight: 400;">Qty</th>
             </tr>
           </thead>
           <tbody>${itemRows}</tbody>
         </table>
-        <p style="font-size: 0.8rem; color: #8C6E5A; margin-top: 1.5rem;">
+        <p style="font-size: 1rem; color: #8C6E5A; margin-top: 1.5rem;">
           Please review and send a Stripe invoice to the partner.
         </p>
       </div>
       <div style="background: #3D2B1F; padding: 1rem; text-align: center;">
-        <p style="color: #EDE5D0; font-size: 0.7rem; opacity: 0.6; margin: 0;">
+        <p style="color: #EDE5D0; font-size: 1rem; opacity: 0.6; margin: 0;">
           Parmigiano Reggiano Trade Shop
         </p>
       </div>
@@ -117,18 +117,18 @@ export async function POST(req: NextRequest) {
           <h1 style="color: #D4AF5A; font-size: 1.4rem; font-weight: 400; letter-spacing: 0.15em; text-transform: uppercase; margin: 0;">
             Parmigiano Reggiano
           </h1>
-          <p style="color: #EDE5D0; font-size: 0.8rem; margin: 0.5rem 0 0; letter-spacing: 0.1em;">Order Recap</p>
+          <p style="color: #EDE5D0; font-size: 1rem; margin: 0.5rem 0 0; letter-spacing: 0.1em;">Order Recap</p>
         </div>
         <div style="padding: 2rem; background: #F7F2E8;">
-          <p style="font-size: 0.9rem; color: #6B4C38; margin-bottom: 1.5rem;">
+          <p style="font-size: 1rem; color: #6B4C38; margin-bottom: 1.5rem;">
             Thank you, ${partnerName}. Here&rsquo;s a recap of the order you just submitted.
           </p>
           <table style="width: 100%; border-collapse: collapse; background: #FDFAF4; border: 1px solid #D9C9A8;">
             <thead>
               <tr style="background: #3D2B1F;">
-                <th style="padding: 10px 12px; color: #D4AF5A; font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; text-align: left; font-weight: 400;">Product</th>
-                <th style="padding: 10px 12px; color: #D4AF5A; font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; text-align: left; font-weight: 400;">Code</th>
-                <th style="padding: 10px 12px; color: #D4AF5A; font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; text-align: center; font-weight: 400;">Qty</th>
+                <th style="padding: 10px 12px; color: #D4AF5A; font-size: 1rem; letter-spacing: 0.15em; text-transform: uppercase; text-align: left; font-weight: 400;">Product</th>
+                <th style="padding: 10px 12px; color: #D4AF5A; font-size: 1rem; letter-spacing: 0.15em; text-transform: uppercase; text-align: left; font-weight: 400;">Code</th>
+                <th style="padding: 10px 12px; color: #D4AF5A; font-size: 1rem; letter-spacing: 0.15em; text-transform: uppercase; text-align: center; font-weight: 400;">Qty</th>
               </tr>
             </thead>
             <tbody>${itemRows}</tbody>
@@ -141,7 +141,7 @@ export async function POST(req: NextRequest) {
           </p>
         </div>
         <div style="background: #3D2B1F; padding: 1rem; text-align: center;">
-          <p style="color: #EDE5D0; font-size: 0.7rem; opacity: 0.6; margin: 0;">
+          <p style="color: #EDE5D0; font-size: 1rem; opacity: 0.6; margin: 0;">
             Parmigiano Reggiano Trade Shop
           </p>
         </div>

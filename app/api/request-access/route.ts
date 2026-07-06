@@ -56,10 +56,10 @@ export async function PATCH(req: NextRequest) {
             <h1 style="color: #D4AF5A; font-size: 1.4rem; font-weight: 400; letter-spacing: 0.15em; text-transform: uppercase; margin: 0;">
               Parmigiano Reggiano
             </h1>
-            <p style="color: #EDE5D0; font-size: 0.8rem; margin: 0.5rem 0 0; letter-spacing: 0.1em;">Trade Shop Access Approved</p>
+            <p style="color: #EDE5D0; font-size: 1rem; margin: 0.5rem 0 0; letter-spacing: 0.1em;">Trade Shop Access Approved</p>
           </div>
           <div style="padding: 2rem; background: #F7F2E8;">
-            <p style="font-size: 0.9rem; color: #6B4C38; margin-bottom: 1.5rem;">
+            <p style="font-size: 1rem; color: #6B4C38; margin-bottom: 1.5rem;">
               Welcome, ${target.firstName}! Your request for <strong>${target.company}</strong> has been approved.
             </p>
             <p style="font-size: 1rem; color: #8C6E5A; margin-bottom: 0.5rem;">Your access code</p>
@@ -71,7 +71,7 @@ export async function PATCH(req: NextRequest) {
             </p>
           </div>
           <div style="background: #3D2B1F; padding: 1rem; text-align: center;">
-            <p style="color: #EDE5D0; font-size: 0.7rem; opacity: 0.6; margin: 0;">
+            <p style="color: #EDE5D0; font-size: 1rem; opacity: 0.6; margin: 0;">
               Parmigiano Reggiano Trade Shop
             </p>
           </div>
@@ -129,10 +129,10 @@ export async function POST(req: NextRequest) {
         <h1 style="color: #D4AF5A; font-size: 1.4rem; font-weight: 400; letter-spacing: 0.15em; text-transform: uppercase; margin: 0;">
           Parmigiano Reggiano
         </h1>
-        <p style="color: #EDE5D0; font-size: 0.8rem; margin: 0.5rem 0 0; letter-spacing: 0.1em;">New Access Request</p>
+        <p style="color: #EDE5D0; font-size: 1rem; margin: 0.5rem 0 0; letter-spacing: 0.1em;">New Access Request</p>
       </div>
       <div style="padding: 2rem; background: #F7F2E8;">
-        <p style="font-size: 0.9rem; color: #6B4C38; margin-bottom: 1.5rem;">
+        <p style="font-size: 1rem; color: #6B4C38; margin-bottom: 1.5rem;">
           A trade partner has requested shop access.
         </p>
         <table style="width: 100%; border-collapse: collapse; background: #FDFAF4; border: 1px solid #D9C9A8;">
@@ -151,12 +151,12 @@ export async function POST(req: NextRequest) {
             </tr>
           </tbody>
         </table>
-        <p style="font-size: 0.8rem; color: #8C6E5A; margin-top: 1.5rem;">
+        <p style="font-size: 1rem; color: #8C6E5A; margin-top: 1.5rem;">
           Reply to this partner and issue them an access code if approved.
         </p>
       </div>
       <div style="background: #3D2B1F; padding: 1rem; text-align: center;">
-        <p style="color: #EDE5D0; font-size: 0.7rem; opacity: 0.6; margin: 0;">
+        <p style="color: #EDE5D0; font-size: 1rem; opacity: 0.6; margin: 0;">
           Parmigiano Reggiano Trade Shop
         </p>
       </div>
