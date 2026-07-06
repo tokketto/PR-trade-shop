@@ -46,7 +46,7 @@ const SEED_PRODUCTS: Product[] = [
   { name: 'Plastic Cheese Wheel', code: 'PR2508', sku: 'Adv_PR2508', qty: 30, category: 'display', img: 'https://res.cloudinary.com/w1ti71ox/image/upload/v1783186278/Plastic-Wheel_wlsw2k.jpg', price: 60 },
   { name: 'Plastic Cheese Wheel with Bowl', code: 'PR2508b', sku: 'Adv_PR2508b', qty: 28, category: 'display', img: 'https://res.cloudinary.com/w1ti71ox/image/upload/v1783186297/Plastic-wheel-with-bowl_dezq3j.jpg', price: 75 },
   { name: 'Cheese Wheel Holders', code: 'PR2502', sku: 'Adv_PR2502', qty: 5, category: 'display', img: 'https://res.cloudinary.com/w1ti71ox/image/upload/v1783186399/Wheel-stand_ka8qys.jpg', price: 120 },
-  { name: 'Zocca — Battitore Inspection Stand', code: 'PR-ZOCCA', sku: 'Adv_ZOCCA', qty: 10, category: 'display', img: 'https://res.cloudinary.com/w1ti71ox/image/upload/v1783186379/Zocca_zubuna.jpg', price: 900, priceNote: 'incl. shipping' },
+  { name: 'Zocca — Battitore Inspection Stand', code: 'PR-ZOCCA', sku: 'Adv_ZOCCA', qty: 10, category: 'display', img: 'https://res.cloudinary.com/w1ti71ox/image/upload/v1783186379/Zocca_zubuna.jpg', price: 700 },
   // ACCESSORIES
   { name: 'Cutting Board 18 × 7"', code: 'PR2501', sku: 'Adv_PR2501', qty: 3, category: 'accessories', img: 'https://res.cloudinary.com/w1ti71ox/image/upload/v1783186304/Cutting-board_c6f802.jpg', price: 55 },
   { name: 'Table Runner 36" × 90"', code: 'PR2606', sku: 'Adv_PR2606', qty: 16, category: 'accessories', img: 'https://res.cloudinary.com/w1ti71ox/image/upload/v1783186334/Runner_natssm.jpg', price: 28 },
