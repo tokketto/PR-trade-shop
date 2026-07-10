@@ -165,6 +165,7 @@ export default function ProductsPage() {
               <th>SKU</th>
               <th>Category</th>
               <th>Price</th>
+              <th>Price Note</th>
               <th>Qty</th>
               <th>Description</th>
               <th>Variant</th>
@@ -205,6 +206,11 @@ export default function ProductsPage() {
                   <input className="admin-input" type="number" step="0.01" style={{width:'4.5rem', minWidth:0}}
                     value={draftValue(p, 'price')}
                     onChange={e => setDraft(p.sku, 'price', e.target.value)} />
+                </td>
+                <td>
+                  <input className="admin-input" style={{minWidth:130}} placeholder="e.g. incl. shipping"
+                    value={draftValue(p, 'priceNote') ?? ''}
+                    onChange={e => setDraft(p.sku, 'priceNote', e.target.value)} />
                 </td>
                 <td>
                   <input className="admin-input" type="number" style={{width:'5.5rem', minWidth:0}}
