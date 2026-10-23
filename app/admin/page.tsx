@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Partner } from '@/lib/partners'
 import type { AccessRequest } from '@/lib/access-requests'
+import { readApiResponse } from '@/lib/read-response'
 
 export default function AdminPage() {
   const router = useRouter()
@@ -32,15 +33,22 @@ export default function AdminPage() {
     if (!p.isAdmin) { router.push('/shop'); return }
 
     Promise.all([
-      fetch('/api/partners').then(r => r.json()),
-      fetch('/api/request-access').then(r => r.json()),
+      fetch('/api/partners').then(res => readApiResponse<Partner[]>(res)),
+      fetch('/api/request-access').then(res => readApiResponse<AccessRequest[]>(res)),
     ])
       .then(([partnersData, requestsData]) => {
-        setPartners(partnersData)
-        setRequests(Array.isArray(requestsData) ? requestsData : [])
+        if (!Array.isArray(partnersData) || !Array.isArray(requestsData)) {
+          setError('Could not load — database unavailable')
+        } else {
+          setPartners(partnersData)
+          setRequests(requestsData)
+        }
         setLoaded(true)
       })
-      .catch(() => setLoaded(true))
+      .catch(err => {
+        setError(err instanceof Error ? err.message : 'Could not load — database unavailable')
+        setLoaded(true)
+      })
   }, [router])
 
   async function updatePartner(body: object): Promise<boolean> {
@@ -50,13 +58,13 @@ export default function AdminPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       })
-      const data = await res.json()
-      if (!res.ok) { setError(data.error || 'Something went wrong.'); return false }
+      const data = await readApiResponse<Partner[]>(res)
+      if (!Array.isArray(data)) { setError('Could not save — database unavailable'); return false }
       setPartners(data)
       setError('')
       return true
-    } catch {
-      setError('Something went wrong. Please try again.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
       return false
     }
   }
@@ -81,12 +89,12 @@ export default function AdminPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code }),
       })
-      const data = await res.json()
-      if (!res.ok) { setError(data.error || 'Something went wrong.'); return }
+      const data = await readApiResponse<Partner[]>(res)
+      if (!Array.isArray(data)) { setError('Could not save — database unavailable'); return }
       setPartners(data)
       setError('')
-    } catch {
-      setError('Something went wrong. Please try again.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
     }
   }
 
@@ -125,12 +133,12 @@ export default function AdminPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: newName.trim(), code: newCode.trim() }),
       })
-      const data = await res.json()
-      if (!res.ok) { setError(data.error || 'Something went wrong.'); setSaving(false); return }
+      const data = await readApiResponse<Partner[]>(res)
+      if (!Array.isArray(data)) { setError('Could not save — database unavailable'); setSaving(false); return }
       setPartners(data)
       setNewName(''); setNewCode('')
-    } catch {
-      setError('Something went wrong. Please try again.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
     }
     setSaving(false)
   }
@@ -146,15 +154,15 @@ export default function AdminPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, code }),
       })
-      const data = await res.json()
-      if (!res.ok) {
-        setRequestErrors(prev => ({ ...prev, [id]: data.error || 'Something went wrong.' }))
+      const data = await readApiResponse<{ partners: Partner[]; requests: AccessRequest[] }>(res)
+      if (!data || !Array.isArray(data.partners) || !Array.isArray(data.requests)) {
+        setRequestErrors(prev => ({ ...prev, [id]: 'Could not save — database unavailable' }))
       } else {
         setPartners(data.partners)
         setRequests(data.requests)
       }
-    } catch {
-      setRequestErrors(prev => ({ ...prev, [id]: 'Something went wrong.' }))
+    } catch (err) {
+      setRequestErrors(prev => ({ ...prev, [id]: err instanceof Error ? err.message : 'Something went wrong.' }))
     }
     setApproving(prev => ({ ...prev, [id]: false }))
   }
@@ -193,8 +201,9 @@ export default function AdminPage() {
           Codes are stored in your database and take effect immediately — no redeploy needed. Revoking a
           partner disables their code right away. Edit a partner&apos;s name or code directly to fix a typo or
           avoid a duplicate, then hit Save. Contact info is filled in automatically when approving an access
-          request; shipping address is entered manually. Both appear on order emails.
+          request; shipping address is entered manually.           Both appear on order emails.
         </div>
+        {error && <div className="login-error">{error}</div>}
 
         <div className="table-scroll">
         <table className="admin-table">

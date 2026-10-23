@@ -30,7 +30,16 @@ export default function LoginPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ company: company.trim(), firstName: firstName.trim(), lastName: lastName.trim(), email: email.trim() }),
       })
-      if (!res.ok) { setRequestError('Something went wrong. Please try again.'); setRequestLoading(false); return }
+      if (!res.ok) {
+        let message = 'Something went wrong. Please try again.'
+        try {
+          const data = await res.json()
+          if (data && typeof data.error === 'string') message = data.error
+        } catch { /* keep the generic message */ }
+        setRequestError(message)
+        setRequestLoading(false)
+        return
+      }
       setRequestSent(true)
     } catch {
       setRequestError('Something went wrong. Please try again.')
@@ -48,7 +57,18 @@ export default function LoginPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code: code.trim() }),
       })
-      if (!res.ok) { setError('Invalid or revoked access code. Please contact us.'); setLoading(false); return }
+      if (!res.ok) {
+        let message = 'Invalid or revoked access code. Please contact us.'
+        if (res.status !== 401 && res.status !== 400) {
+          try {
+            const data = await res.json()
+            if (data && typeof data.error === 'string') message = data.error
+          } catch { /* keep the generic message */ }
+        }
+        setError(message)
+        setLoading(false)
+        return
+      }
       const data = await res.json()
       // Store only name and role — never the code
       sessionStorage.setItem('pr_partner', JSON.stringify({ name: data.name, isAdmin: data.isAdmin }))

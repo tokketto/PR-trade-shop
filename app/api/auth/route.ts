@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getPartners } from '@/lib/partners'
+import { databaseErrorResponse } from '@/lib/api-error'
+import { getPartners, type Partner } from '@/lib/partners'
 import { ADMIN_SESSION_COOKIE, createSessionToken, SESSION_MAX_AGE_SECONDS } from '@/lib/session'
 
 export async function POST(req: NextRequest) {
@@ -10,7 +11,12 @@ export async function POST(req: NextRequest) {
   }
 
   // Codes live in KV (seeded from env on first run) — never sent to the browser
-  const partners = await getPartners()
+  let partners: Partner[]
+  try {
+    partners = await getPartners()
+  } catch (err) {
+    return databaseErrorResponse(err, 'Could not verify access — database unavailable')
+  }
   const match = partners.find(p => p.code === code && p.active)
 
   if (!match) {

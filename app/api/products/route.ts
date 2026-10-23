@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { databaseErrorResponse } from '@/lib/api-error'
 import { getProducts, saveProducts, type Product } from '@/lib/catalog'
 import { isAdminRequest } from '@/lib/session'
 
 export async function GET() {
-  const products = await getProducts()
-  return NextResponse.json(products)
+  try {
+    const products = await getProducts()
+    return NextResponse.json(products)
+  } catch (err) {
+    return databaseErrorResponse(err, 'Could not load products — database unavailable')
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -45,8 +50,7 @@ export async function POST(req: NextRequest) {
     await saveProducts(updated)
     return NextResponse.json(updated)
   } catch (err) {
-    console.error('Add product error:', err)
-    return NextResponse.json({ error: 'Could not save — database unavailable' }, { status: 500 })
+    return databaseErrorResponse(err, 'Could not save — database unavailable')
   }
 }
 
@@ -92,8 +96,7 @@ export async function PATCH(req: NextRequest) {
     await saveProducts(updated)
     return NextResponse.json(updated)
   } catch (err) {
-    console.error('Update product error:', err)
-    return NextResponse.json({ error: 'Could not save — database unavailable' }, { status: 500 })
+    return databaseErrorResponse(err, 'Could not save — database unavailable')
   }
 }
 
@@ -118,7 +121,6 @@ export async function DELETE(req: NextRequest) {
     await saveProducts(updated)
     return NextResponse.json(updated)
   } catch (err) {
-    console.error('Delete product error:', err)
-    return NextResponse.json({ error: 'Could not save — database unavailable' }, { status: 500 })
+    return databaseErrorResponse(err, 'Could not save — database unavailable')
   }
 }

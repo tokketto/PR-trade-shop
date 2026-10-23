@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { addAccessRequest, getAccessRequests, saveAccessRequests } from '@/lib/access-requests'
+import { databaseErrorResponse } from '@/lib/api-error'
 import { getPartners, savePartners } from '@/lib/partners'
 import { isAdminRequest } from '@/lib/session'
 
@@ -7,8 +8,12 @@ export async function GET(req: NextRequest) {
   if (!isAdminRequest(req)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
-  const requests = await getAccessRequests()
-  return NextResponse.json(requests)
+  try {
+    const requests = await getAccessRequests()
+    return NextResponse.json(requests)
+  } catch (err) {
+    return databaseErrorResponse(err, 'Could not load access requests — database unavailable')
+  }
 }
 
 export async function PATCH(req: NextRequest) {
@@ -79,7 +84,7 @@ export async function PATCH(req: NextRequest) {
       `
 
       try {
-        await fetch('https://api.resend.com/emails', {
+        const emailRes = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${apiKey}`,
@@ -93,15 +98,17 @@ export async function PATCH(req: NextRequest) {
             html: welcomeHtml,
           }),
         })
+        if (!emailRes.ok) {
+          console.error('Approval email failed:', emailRes.status)
+        }
       } catch (err) {
-        console.error('Approval email error:', err)
+        console.error('Approval email error:', err instanceof Error ? err.name : 'error')
       }
     }
 
     return NextResponse.json({ partners: updatedPartners, requests: updatedRequests })
   } catch (err) {
-    console.error('Approve request error:', err)
-    return NextResponse.json({ error: 'Could not save — database unavailable' }, { status: 500 })
+    return databaseErrorResponse(err, 'Could not save — database unavailable')
   }
 }
 
@@ -115,7 +122,7 @@ export async function POST(req: NextRequest) {
   try {
     await addAccessRequest({ company: company.trim(), firstName: firstName.trim(), lastName: lastName.trim(), email: email.trim() })
   } catch (err) {
-    console.error('Failed to persist access request:', err)
+    return databaseErrorResponse(err, 'Could not save the request — database unavailable')
   }
 
   const apiKey = process.env.RESEND_API_KEY
