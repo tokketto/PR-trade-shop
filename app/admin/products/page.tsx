@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Product } from '@/lib/catalog'
 import { categoryLabels } from '@/lib/catalog'
+import { readApiResponse } from '@/lib/read-response'
 
 const CATEGORIES = Object.keys(categoryLabels)
 
@@ -29,12 +30,19 @@ export default function ProductsPage() {
     if (!s.isAdmin) { router.push('/shop'); return }
 
     fetch('/api/products')
-      .then(r => r.json())
+      .then(res => readApiResponse<Product[]>(res))
       .then(data => {
-        setProducts(Array.isArray(data) ? data : [])
+        if (!Array.isArray(data)) {
+          setError('Could not load products — database unavailable')
+        } else {
+          setProducts(data)
+        }
         setLoaded(true)
       })
-      .catch(() => setLoaded(true))
+      .catch(err => {
+        setError(err instanceof Error ? err.message : 'Could not load products — database unavailable')
+        setLoaded(true)
+      })
   }, [router])
 
   function draftValue<K extends keyof Product>(p: Product, field: K): Product[K] {
@@ -64,12 +72,12 @@ export default function ProductsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       })
-      const data = await res.json()
-      if (!res.ok) { setError(data.error || 'Something went wrong.'); setRowSaving(prev => ({ ...prev, [sku]: false })); return }
+      const data = await readApiResponse<Product[]>(res)
+      if (!Array.isArray(data)) { setError('Could not save — database unavailable'); setRowSaving(prev => ({ ...prev, [sku]: false })); return }
       setProducts(data)
       clearDraft(sku)
-    } catch {
-      setError('Something went wrong. Please try again.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
     }
     setRowSaving(prev => ({ ...prev, [sku]: false }))
   }
@@ -86,11 +94,11 @@ export default function ProductsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sku }),
       })
-      const data = await res.json()
-      if (!res.ok) { setError(data.error || 'Something went wrong.'); setRowDeleting(prev => ({ ...prev, [sku]: false })); return }
+      const data = await readApiResponse<Product[]>(res)
+      if (!Array.isArray(data)) { setError('Could not save — database unavailable'); setRowDeleting(prev => ({ ...prev, [sku]: false })); return }
       setProducts(data)
-    } catch {
-      setError('Something went wrong. Please try again.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
     }
     setRowDeleting(prev => ({ ...prev, [sku]: false }))
   }
@@ -113,12 +121,12 @@ export default function ProductsPage() {
           qty: newProduct.qty.trim() ? Number(newProduct.qty) : 0,
         }),
       })
-      const data = await res.json()
-      if (!res.ok) { setError(data.error || 'Something went wrong.'); setAdding(false); return }
+      const data = await readApiResponse<Product[]>(res)
+      if (!Array.isArray(data)) { setError('Could not save — database unavailable'); setAdding(false); return }
       setProducts(data)
       setNewProduct({ name: '', code: '', sku: '', category: CATEGORIES[0], price: '', qty: '', img: '', priceNote: '', description: '', variantGroup: '', variantLabel: '' })
-    } catch {
-      setError('Something went wrong. Please try again.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
     }
     setAdding(false)
   }
@@ -154,6 +162,7 @@ export default function ProductsPage() {
           same Variant Group (e.g. &quot;tshirt&quot;) to merge them into one card in the shop with a size/option
           picker — the Variant Label (e.g. &quot;Small&quot;) is what shows in that picker.
         </div>
+        {error && <div className="login-error">{error}</div>}
 
         <div className="table-scroll">
         <table className="admin-table">

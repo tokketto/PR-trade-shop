@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { databaseErrorResponse } from '@/lib/api-error'
 import { getProducts, saveProducts } from '@/lib/catalog'
-import { getPartners } from '@/lib/partners'
+import { getPartners, type Partner } from '@/lib/partners'
 import { addOrder } from '@/lib/orders'
 
 export async function POST(req: NextRequest) {
@@ -13,10 +14,11 @@ export async function POST(req: NextRequest) {
   try {
     await addOrder({ partnerName, items })
   } catch (err) {
-    console.error('Failed to persist order:', err)
+    return databaseErrorResponse(err, 'Could not save the order — database unavailable')
   }
 
-  // Decrease quantities in the product catalog
+  // Decrease quantities only after a successful catalog read. A failed read
+  // throws before saveProducts, so the static seed is never written over live data.
   try {
     const products = await getProducts()
     const updated = products.map(product => {
@@ -25,7 +27,7 @@ export async function POST(req: NextRequest) {
     })
     await saveProducts(updated)
   } catch (err) {
-    console.error('Failed to update product quantities:', err)
+    return databaseErrorResponse(err, 'Your order was saved but inventory could not be updated. Please contact us instead of submitting again.', { preferFallback: true })
   }
 
   // Send email via Resend
@@ -34,7 +36,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Email service not configured' }, { status: 500 })
   }
 
-  const partners = await getPartners()
+  let partners: Partner[]
+  try {
+    partners = await getPartners()
+  } catch (err) {
+    return databaseErrorResponse(err, 'Your order was saved but we could not send confirmation. Please contact us instead of submitting again.', { preferFallback: true })
+  }
   const partner = partners.find(p => p.name === partnerName)
   const shippingAddress = partner?.shippingAddress?.trim()
 
@@ -149,7 +156,7 @@ export async function POST(req: NextRequest) {
     `
 
     try {
-      await fetch('https://api.resend.com/emails', {
+      const recapRes = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${apiKey}`,
@@ -163,8 +170,11 @@ export async function POST(req: NextRequest) {
           html: recapHtml,
         }),
       })
+      if (!recapRes.ok) {
+        console.error('Partner recap email failed:', recapRes.status)
+      }
     } catch (err) {
-      console.error('Partner recap email error:', err)
+      console.error('Partner recap email error:', err instanceof Error ? err.name : 'error')
     }
   }
 

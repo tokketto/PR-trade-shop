@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { categoryLabels, type Product } from '@/lib/catalog'
+import { readApiResponse } from '@/lib/read-response'
 
 type CartItem = { qty: number }
 
@@ -17,6 +18,7 @@ export default function ShopPage() {
   const [orderSending, setOrderSending] = useState(false)
   const [products, setProducts] = useState<Product[]>([])
   const [productsLoaded, setProductsLoaded] = useState(false)
+  const [productsError, setProductsError] = useState('')
   const [lightbox, setLightbox] = useState<{ src: string; alt: string } | null>(null)
   const [selectedVariant, setSelectedVariant] = useState<Record<string, string>>({})
 
@@ -28,12 +30,19 @@ export default function ShopPage() {
     setIsAdmin(!!p.isAdmin)
 
     fetch('/api/products')
-      .then(r => r.json())
+      .then(res => readApiResponse<Product[]>(res))
       .then(data => {
-        setProducts(Array.isArray(data) ? data : [])
+        if (!Array.isArray(data)) {
+          setProductsError('Could not load products — database unavailable')
+        } else {
+          setProducts(data)
+        }
         setProductsLoaded(true)
       })
-      .catch(() => setProductsLoaded(true))
+      .catch(err => {
+        setProductsError(err instanceof Error ? err.message : 'Could not load products — database unavailable')
+        setProductsLoaded(true)
+      })
   }, [router])
 
   useEffect(() => {
@@ -97,18 +106,20 @@ export default function ShopPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ partnerName, items }),
       })
-      if (!res.ok) {
-        alert('Something went wrong submitting your order. Please try again.')
-        setOrderSending(false)
-        return
-      }
+      await readApiResponse(res)
       setCart({})
-      // Refresh product quantities after order
-      const updated = await fetch('/api/products').then(r => r.json())
-      setProducts(Array.isArray(updated) ? updated : [])
+      try {
+        const refreshed = await fetch('/api/products')
+        if (refreshed.ok) {
+          const updated = await refreshed.json()
+          if (Array.isArray(updated)) setProducts(updated)
+        }
+      } catch {
+        // The order is already saved. Keep the quantities already on screen.
+      }
       setOrderSent(true)
-    } catch {
-      alert('Something went wrong. Please try again.')
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
     }
     setOrderSending(false)
   }
@@ -176,7 +187,7 @@ export default function ShopPage() {
       <main className="shop-main">
         <div className="section-label">Trade Collection</div>
         <div className="section-title">Available Inventory</div>
-        <div className="product-grid">
+        {productsError ? <div className="login-error">{productsError}</div> : <div className="product-grid">
           {displayItems.map(({ key, variants }) => {
             const activeSku = selectedVariant[key] ?? variants[0].sku
             const p = variants.find(v => v.sku === activeSku) ?? variants[0]
@@ -226,7 +237,7 @@ export default function ShopPage() {
               </div>
             )
           })}
-        </div>
+        </div>}
       </main>
 
       {cartCount > 0 && (

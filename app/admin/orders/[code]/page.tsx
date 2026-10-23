@@ -4,6 +4,7 @@ import { useRouter, useParams } from 'next/navigation'
 import type { Partner } from '@/lib/partners'
 import type { Order } from '@/lib/orders'
 import type { Product } from '@/lib/catalog'
+import { readApiResponse } from '@/lib/read-response'
 
 export default function PartnerOrdersPage() {
   const router = useRouter()
@@ -12,6 +13,7 @@ export default function PartnerOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [products, setProducts] = useState<Product[]>([])
   const [loaded, setLoaded] = useState(false)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     const session = sessionStorage.getItem('pr_partner')
@@ -22,21 +24,33 @@ export default function PartnerOrdersPage() {
     const code = decodeURIComponent(params.code)
 
     Promise.all([
-      fetch('/api/partners').then(r => r.json()),
-      fetch('/api/products').then(r => r.json()),
+      fetch('/api/partners').then(res => readApiResponse<Partner[]>(res)),
+      fetch('/api/products').then(res => readApiResponse<Product[]>(res)),
     ])
-      .then(async ([partners, productsData]: [Partner[], Product[]]) => {
-        setProducts(Array.isArray(productsData) ? productsData : [])
-        const p = Array.isArray(partners) ? partners.find(x => x.code === code) : undefined
+      .then(async ([partners, productsData]) => {
+        if (!Array.isArray(partners) || !Array.isArray(productsData)) {
+          setError('Could not load — database unavailable')
+          setLoaded(true)
+          return
+        }
+        setProducts(productsData)
+        const p = partners.find(x => x.code === code)
         setPartner(p ?? null)
         if (p) {
           const res = await fetch(`/api/orders?partner=${encodeURIComponent(p.name)}`)
-          const data = await res.json()
-          setOrders(Array.isArray(data) ? data : [])
+          const data = await readApiResponse<Order[]>(res)
+          if (!Array.isArray(data)) {
+            setError('Could not load orders — database unavailable')
+          } else {
+            setOrders(data)
+          }
         }
         setLoaded(true)
       })
-      .catch(() => setLoaded(true))
+      .catch(err => {
+        setError(err instanceof Error ? err.message : 'Could not load — database unavailable')
+        setLoaded(true)
+      })
   }, [router, params.code])
 
   const totals = new Map<string, { name: string; qty: number; value: number }>()
@@ -62,6 +76,19 @@ export default function PartnerOrdersPage() {
     <div style={{minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:'var(--brown)'}}>
       <p style={{color:'var(--gold-light)', fontFamily:'Libre Bodoni, serif', fontSize:'1.2rem', letterSpacing:'0.1em'}}>Loading…</p>
     </div>
+  )
+
+  if (error) return (
+    <>
+      <header>
+        <a className="logo" href="/admin">Parmigiano Reggiano <span>Trade Partners</span></a>
+      </header>
+      <div className="admin-wrap">
+        <button className="admin-back" onClick={() => router.push('/admin')}>← Back to Admin</button>
+        <div className="admin-title">Could not load</div>
+        <div className="login-error">{error}</div>
+      </div>
+    </>
   )
 
   if (!partner) return (

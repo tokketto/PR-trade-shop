@@ -1,4 +1,4 @@
-import { kvGetString, kvSetString } from './kv'
+import { isKvConfigured, KvError, kvSetString, readJsonArray, writeJsonArrayIfMissing } from './kv'
 
 export type Partner = {
   name: string
@@ -21,20 +21,14 @@ function seedFromEnv(): Partner[] {
 }
 
 export async function getPartners(): Promise<Partner[]> {
-  try {
-    const raw = await kvGetString(PARTNERS_KEY)
-    if (raw) {
-      try { return JSON.parse(raw) } catch { /* fall through and reseed */ }
-    }
-    const seeded = seedFromEnv()
-    await savePartners(seeded)
-    return seeded
-  } catch (err) {
-    console.error('Partners KV error, falling back to env seed:', err)
-    return seedFromEnv()
-  }
+  if (!isKvConfigured()) return seedFromEnv()
+  const stored = await readJsonArray<Partner>(PARTNERS_KEY, 'partners')
+  if (stored === null) return writeJsonArrayIfMissing(PARTNERS_KEY, seedFromEnv(), 'partners')
+  return stored
 }
 
 export async function savePartners(partners: Partner[]): Promise<void> {
-  await kvSetString(PARTNERS_KEY, JSON.stringify(partners))
+  if (!isKvConfigured()) return
+  const wrote = await kvSetString(PARTNERS_KEY, JSON.stringify(partners))
+  if (!wrote) throw new KvError('Could not save — database unavailable')
 }

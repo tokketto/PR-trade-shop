@@ -1,4 +1,4 @@
-import { kvGetString, kvSetString } from './kv'
+import { isKvConfigured, KvError, kvGetString, kvSetString, readJsonArray, writeJsonArrayIfMissing } from './kv'
 
 export type Product = {
   name: string
@@ -25,8 +25,8 @@ export const categoryLabels: Record<string, string> = {
 
 const PRODUCTS_KEY = 'products'
 
-// One-time seed data — only used the first time the KV store is read.
-// After that, /admin/products is the source of truth.
+// Seed data — written only when a successful read confirms the products key
+// is absent. A read error or unreadable value must not fall back to this list.
 const SEED_PRODUCTS: Product[] = [
   // APPAREL
   { name: 'Apron (Polyester)', code: 'PR2504', sku: 'Adv_PR2504', qty: 122, category: 'apparel', img: 'https://res.cloudinary.com/w1ti71ox/image/upload/v1783186134/Apron_zxnefd.jpg', price: 18 },
@@ -59,25 +59,20 @@ const SEED_PRODUCTS: Product[] = [
 async function seedFromStatic(): Promise<Product[]> {
   const seeded = await Promise.all(SEED_PRODUCTS.map(async (p) => {
     const liveQty = await kvGetString(`inv:${p.sku}`)
-    return liveQty !== null ? { ...p, qty: parseInt(liveQty) || 0 } : p
+    return liveQty !== null ? { ...p, qty: parseInt(liveQty, 10) || 0 } : p
   }))
-  await saveProducts(seeded)
-  return seeded
+  return writeJsonArrayIfMissing(PRODUCTS_KEY, seeded, 'product catalog')
 }
 
 export async function getProducts(): Promise<Product[]> {
-  try {
-    const raw = await kvGetString(PRODUCTS_KEY)
-    if (raw) {
-      try { return JSON.parse(raw) } catch { /* fall through and reseed */ }
-    }
-    return await seedFromStatic()
-  } catch (err) {
-    console.error('Products KV error, falling back to static seed:', err)
-    return SEED_PRODUCTS
-  }
+  if (!isKvConfigured()) return SEED_PRODUCTS
+  const stored = await readJsonArray<Product>(PRODUCTS_KEY, 'product catalog')
+  if (stored === null) return seedFromStatic()
+  return stored
 }
 
 export async function saveProducts(products: Product[]): Promise<void> {
-  await kvSetString(PRODUCTS_KEY, JSON.stringify(products))
+  if (!isKvConfigured()) return
+  const wrote = await kvSetString(PRODUCTS_KEY, JSON.stringify(products))
+  if (!wrote) throw new KvError('Could not save — database unavailable')
 }

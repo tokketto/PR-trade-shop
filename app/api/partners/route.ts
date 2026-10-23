@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { databaseErrorResponse } from '@/lib/api-error'
 import { getPartners, savePartners } from '@/lib/partners'
 import { isAdminRequest } from '@/lib/session'
 
@@ -6,8 +7,12 @@ export async function GET(req: NextRequest) {
   if (!isAdminRequest(req)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
-  const partners = await getPartners()
-  return NextResponse.json(partners)
+  try {
+    const partners = await getPartners()
+    return NextResponse.json(partners)
+  } catch (err) {
+    return databaseErrorResponse(err, 'Could not load partners — database unavailable')
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -31,8 +36,7 @@ export async function POST(req: NextRequest) {
     await savePartners(updated)
     return NextResponse.json(updated)
   } catch (err) {
-    console.error('Add partner error:', err)
-    return NextResponse.json({ error: 'Could not save — database unavailable' }, { status: 500 })
+    return databaseErrorResponse(err, 'Could not save — database unavailable')
   }
 }
 
@@ -76,8 +80,7 @@ export async function PATCH(req: NextRequest) {
     await savePartners(updated)
     return NextResponse.json(updated)
   } catch (err) {
-    console.error('Update partner error:', err)
-    return NextResponse.json({ error: 'Could not save — database unavailable' }, { status: 500 })
+    return databaseErrorResponse(err, 'Could not save — database unavailable')
   }
 }
 
@@ -106,7 +109,6 @@ export async function DELETE(req: NextRequest) {
     await savePartners(updated)
     return NextResponse.json(updated)
   } catch (err) {
-    console.error('Delete partner error:', err)
-    return NextResponse.json({ error: 'Could not save — database unavailable' }, { status: 500 })
+    return databaseErrorResponse(err, 'Could not save — database unavailable')
   }
 }
